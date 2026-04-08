@@ -1,28 +1,42 @@
 """
-Fig 12 — External field comparison: effect of B0 on gradient and capture distance.
+Fig 12 — External field comparison: effect of B0 on gradient magnitude.
 
-2×2 panel figure:
+2x2 panel figure:
 
 (a) Gradient through-strut profile — B0 = 0  (stent field alone)
 (b) Gradient through-strut profile — B0 = 0.5 T axial (+z)
 (c) Gradient through-strut profile — B0 = 0.5 T transverse (+x, parallel to M)
-(d) Capture distance vs B0 magnitude (0 to 1 T) for three threshold levels
+(d) Capture distance vs B0 magnitude (0 to 1 T, axial direction) based on
+    the gradient threshold |∇|B_total|| ≥ threshold
 
-Physics note
-------------
-Axial B0 (+z) is perpendicular to the radial strut magnetisation (+x), so it
-maximally changes the direction of B_total and tends to INCREASE the gradient
-of |B_total| near the strut.  Transverse B0 (+x) is parallel to M; it raises
-|B_total| nearly uniformly in the radial direction, which can REDUCE the
-relative spatial variation and hence the gradient of the magnitude.
+Physics note — WHY |∇|B_total|| is REDUCED by axial B0
+-------------------------------------------------------
+When B0 is axial (+z) and the stent magnetisation is radial (+x), the total
+field at an observation point near the strut is dominated by B0:
 
-The capture distance for each threshold is the outermost radial position (from
-the stent outer surface) at which |∇|B_total|| ≥ threshold.
+    B_total ≈ [B_stent_x, 0, B0_z]   (B_stent_x << B0_z at large B0)
+
+The gradient of the magnitude is:
+
+    ∂|B_total|/∂x = (B_total · ∂B_stent/∂x) / |B_total|
+                  ≈ (B_stent_x / B0_z) * ∂B_stent_x/∂x  + small terms
+
+Because B_total is rotated towards z, the projection of the radial gradient
+∂B_stent/∂x onto B_total is suppressed by the factor B_stent_x / B0_z ~ 0.06.
+Hence |∇|B_total|| is correctly reduced — this is NOT a numerical error.
+
+However, this does NOT mean B0 reduces cell capture.  The relevant metric for
+the force on a SPION-labelled cell is the force parameter FP = |B_total|*|∇|B_total||
+(see fig13).  When B0 = 0.5 T, |B_total| increases ~17x while |∇|B_total||
+decreases ~5x, giving a net ~3x gain in FP at 200 µm and ~55x at 500 µm.
+
+This figure shows |∇|B_total|| to document the physics correctly.
+Panel (d) computes capture distance from gradient-threshold crossings; it is
+provided for completeness but should be interpreted alongside fig13 which
+shows the physically relevant force parameter.
 
 Default stent: R=1.5 mm, w=100 µm, t=80 µm, L=500 µm, M=1.0 MA/m, 8 struts.
-The stent is assumed saturated (M = M_sat) at all B0 values shown here.
-StentRing is constructed once per B0 magnitude with assume_saturation=True
-to signal this modelling intent clearly.
+assume_saturation=True throughout.
 
 Run standalone::
 
@@ -63,7 +77,7 @@ def _radial_profile(
     r_outer = R + t / 2
 
     ring = make_ring()
-    ring.assume_saturation = True   # document saturation assumption in output
+    ring.assume_saturation = True
 
     ext = UniformExternalField(B0_vec) if np.any(B0_vec != 0) else None
     tf  = TotalField(ring, ext)
@@ -132,9 +146,8 @@ def make_figure():
     cap_dist_data: dict[str, np.ndarray] = {}
 
     for lbl, thr in THRESHOLDS.items():
-        # Use axial direction (most relevant for clinical MRI)
         cap_dist_data[lbl] = _capture_distance_vs_B0(
-            np.array([0.0, 0.0, 1.0]),   # axial +z direction
+            np.array([0.0, 0.0, 1.0]),
             B0_range,
             np.linspace(5e-6, 1.5e-3, 200),
             thr,
@@ -146,8 +159,16 @@ def make_figure():
     fig, axes = plt.subplots(2, 2, figsize=(14, 11))
     (ax_a, ax_b), (ax_c, ax_d) = axes
 
-    # Common profile plot settings
-    def _profile_ax(ax, G, title, panel_label):
+    # Annotation explaining the physics of gradient reduction
+    _physics_note = (
+        "Note: axial B0 rotates B_total towards z,\n"
+        "suppressing the projection of dB_stent/dx\n"
+        "onto B_total. Gradient reduction is correct\n"
+        "physics, NOT a numerical error.\n"
+        "See fig13 for the force parameter |B|*|∇B|."
+    )
+
+    def _profile_ax(ax, G, title, panel_label, add_note=False):
         ax.semilogy(d_um, G_noB0, "k--", lw=1.5, alpha=0.5, label="B0 = 0 (reference)")
         ax.semilogy(d_um, G,      "b-",  lw=2.0, label=title)
         for (lbl, val), c in zip(THRESHOLDS.items(), TH_COLORS):
@@ -158,13 +179,26 @@ def make_figure():
         ax.legend(fontsize=8)
         ax.set_xlim(0, 1500)
         ax.set_ylim(0.1, 1e4)
+        if add_note:
+            ax.text(
+                0.97, 0.97, _physics_note,
+                transform=ax.transAxes,
+                ha="right", va="top",
+                fontsize=7, color="#555555",
+                bbox=dict(boxstyle="round,pad=0.3", fc="lightyellow", alpha=0.8),
+            )
 
     _profile_ax(ax_a, G_noB0,  "B0 = 0 (stent field only)", "a")
-    _profile_ax(ax_b, G_axial, "B0 = 0.5 T axial (+z)",     "b")
+    _profile_ax(ax_b, G_axial, "B0 = 0.5 T axial (+z)", "b", add_note=True)
     _profile_ax(ax_c, G_trans, "B0 = 0.5 T transverse (+x, parallel to M)", "c")
 
-    # Panel (d): capture distance vs B0
-    ax_d.set_title("(d) Capture distance vs B0 magnitude (axial field)")
+    # Panel (d): capture distance vs B0 — note in subtitle that grad metric
+    # underestimates capture benefit; refer reader to fig13
+    ax_d.set_title(
+        "(d) Capture distance vs B0 magnitude (axial field)\n"
+        r"[threshold on $|\nabla|B_{total}||$ — see fig13 for force parameter]",
+        fontsize=10,
+    )
     for (lbl, dists), c in zip(cap_dist_data.items(), TH_COLORS):
         ax_d.plot(B0_range, dists, "o-", color=c, lw=2, ms=5, label=lbl)
     ax_d.set_xlabel("B0 magnitude (T)")
@@ -174,17 +208,17 @@ def make_figure():
     ax_d.grid(True, alpha=0.3)
 
     fig.suptitle(
-        "Effect of Uniform External Field on Gradient and Capture Distance\n"
+        "Effect of Uniform External Field on Gradient Magnitude |∇|B_total||\n"
         "(8 struts, R = 1.5 mm, M = 1.0 MA/m, assume_saturation = True,\n"
-        "through-strut radial profile at z = 0)",
-        fontsize=13, y=1.01,
+        "through-strut radial profile at z = 0 — for force parameter see fig13)",
+        fontsize=12, y=1.01,
     )
     plt.tight_layout()
     return fig
 
 
 def main():
-    print("  Fig 12: External field comparison…")
+    print("  Fig 12: External field comparison...")
     fig = make_figure()
     fig.savefig(OUT / "fig12_external_field_comparison.png")
     fig.savefig(OUT / "fig12_external_field_comparison.pdf")

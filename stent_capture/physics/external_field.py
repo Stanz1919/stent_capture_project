@@ -30,17 +30,40 @@ When a uniform external field B0 is applied to the stent geometry:
 
    where B0 is spatially uniform.
 
-3. **Gradient enhancement** — Even though ∇·B0 = 0 and ∇B0 = 0, the gradient
-   of the *magnitude* satisfies:
+3. **Gradient of the magnitude** — Even though ∇·B0 = 0 and ∇B0 = 0, the
+   gradient of the *magnitude* satisfies:
 
        ∂|B_total|/∂x_i = (B_total · ∂B_stent/∂x_i) / |B_total|
 
    This is generally ≠ ∂|B_stent|/∂x_i / |B_stent| because |B_total| ≠ |B_stent|
    and B_total is not parallel to B_stent away from the magnetisation axis.
-   The net effect is that applying B0 *transverse* to the stent magnetisation
-   increases the gradient most strongly, while B0 *parallel* to M provides a
-   uniform background that raises |B| everywhere but suppresses the relative
-   variation (and hence the gradient of the magnitude).
+   When B0 is axial (perpendicular to the radial stent magnetisation), B_total
+   points mostly along z, so the projection of ∂B_stent/∂x onto B_total is
+   suppressed: |∇|B_total|| is *correctly reduced* relative to |∇|B_stent||.
+   This is not a numerical error.
+
+4. **Force parameter — the correct capture metric** — The magnetic force on a
+   superparamagnetic particle (SPION-labelled cell) with effective volume
+   susceptibility χ_eff is:
+
+       F = (V_p · χ_eff / μ₀) · |B_total| · ∇|B_total|
+         = (V_p · χ_eff / (2μ₀)) · ∇(|B_total|²)
+
+   The relevant scalar metric for capture distance is therefore the *force
+   parameter*:
+
+       FP(r) = |B_total(r)| · |∇|B_total(r)||     [units: T²/m]
+
+   When B0 is applied axially, |B_total| increases from ~30 mT to ~500 mT
+   (×17) while |∇|B_total|| decreases by only ~5×, giving a net ~3× gain in
+   FP at 200 µm and a ~55× gain at 500 µm.  **Do not use** |∇|B_total||
+   alone as a proxy for capture force when B0 ≠ 0.
+
+   Stage 2 will formalise this into a full ``MagneticForce`` class with
+   SPION parameters (χ_eff, V_p) and convert FP into a physical force in
+   Newtons.  For Stage 1, callers can compute the force parameter directly:
+
+       fp = tf.B_magnitude(x, y, z) * tf.grad_B(x, y, z)
 """
 
 from __future__ import annotations

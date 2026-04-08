@@ -37,6 +37,7 @@ import numpy as np
 import pytest
 
 from stent_capture.core.field_model import StentRing
+from stent_capture.core.gradient import compute_gradient_magnitude
 from stent_capture.physics.external_field import TotalField, UniformExternalField
 
 # ---------------------------------------------------------------------------
@@ -316,6 +317,78 @@ class TestFarFieldLimit:
         # |grad B| should be < 0.001 T/m at 50mm (far below any capture threshold)
         assert np.all(G_tot < 1e-2), (
             f"|grad B_total| at r=50mm = {G_tot} T/m, expected < 0.01 T/m"
+        )
+
+
+# ===========================================================================
+# Test 5: FD gradient numerical stability under large B0
+# ===========================================================================
+
+class TestFDStability:
+    """
+    Verify that the finite-difference gradient does NOT suffer catastrophic
+    cancellation when a large uniform B0 is present.
+
+    Motivation
+    ----------
+    With B0 = 0.5 T axial and |B_stent| ~ 29 mT at 200 µm, the total field
+    magnitude is dominated by B0.  The FD step computes:
+
+        |B_total(r+dx)| - |B_total(r-dx)|
+
+    which subtracts two numbers both close to |B0| ~ 0.5 T.  In float64 this
+    leaves ~10 significant digits (eps_machine ~ 1e-16, |B0| ~ 1, diff ~ 1e-5
+    gives ~11 sig figs in the difference).  The diagnostic confirmed that the
+    gradient is stable to <0.1% across dx = 1e-8 to 5e-6 m; this test locks
+    that in as a regression.
+
+    The test passes if the ratio (max gradient across dx values) /
+    (min gradient across dx values) is below 1.002 (0.2%), meaning the result
+    is stable to at least 3 significant figures across 3 decades of dx.
+    """
+
+    def test_dx_stability_large_B0(self):
+        ring = _make_ring()
+        ext = UniformExternalField([0.0, 0.0, 0.5])   # 0.5 T axial
+        tf = TotalField(ring, ext)
+
+        R = _DEFAULT["R"]
+        t = _DEFAULT["t"]
+        r_outer = R + t / 2
+        pt = np.array([[r_outer + 200e-6, 0.0, 0.0]])
+
+        dx_values = [1e-8, 1e-7, 5e-7, 1e-6, 2e-6, 5e-6]
+        grads = np.array([
+            compute_gradient_magnitude(tf.field_at, pt, dx=dx)[0]
+            for dx in dx_values
+        ])
+
+        ratio = grads.max() / grads.min()
+        assert ratio < 1.002, (
+            f"FD gradient unstable under B0=0.5T: max/min={ratio:.4f} across "
+            f"dx={dx_values}. Values: {grads.tolist()}"
+        )
+
+    def test_dx_stability_no_B0(self):
+        """Baseline: same stability check without external field."""
+        ring = _make_ring()
+        tf = TotalField(ring)
+
+        R = _DEFAULT["R"]
+        t = _DEFAULT["t"]
+        r_outer = R + t / 2
+        pt = np.array([[r_outer + 200e-6, 0.0, 0.0]])
+
+        dx_values = [1e-8, 1e-7, 5e-7, 1e-6, 2e-6, 5e-6]
+        grads = np.array([
+            compute_gradient_magnitude(tf.field_at, pt, dx=dx)[0]
+            for dx in dx_values
+        ])
+
+        ratio = grads.max() / grads.min()
+        assert ratio < 1.002, (
+            f"FD gradient unstable without B0: max/min={ratio:.4f}. "
+            f"Values: {grads.tolist()}"
         )
 
 

@@ -24,7 +24,33 @@ even though ∇B0 = 0, because the gradient of the *magnitude* is nonlinear:
 
 The component of ∂B_stent/∂x along the (non-zero) B_total direction can be
 larger or smaller than along B_stent alone, depending on the orientation of
-B0 relative to the stent field.
+B0 relative to the stent field.  When B0 is applied axially (perpendicular to
+the radial stent magnetisation), B_total is rotated towards z and the
+projection of ∂B_stent/∂x onto B_total is small — this *correctly* reduces
+|∇|B_total||.  However, the cell-capture force scales as |B_total|·|∇|B_total||,
+not just |∇|B_total|| alone (see physics.external_field.TotalField).
+
+Design note: analytical gradient
+---------------------------------
+The Akoun & Yonnet kernel could in principle be analytically differentiated
+(the arctan and log terms have elementary derivatives).  This was considered
+but ruled out for the following reasons:
+
+1. **Numerical sufficiency**: a diagnostic sweep across dx = 1e-8 to 5e-6 m
+   with B0 = 0.5 T axial (the hardest cancellation case) shows max/min ratio
+   of 1.000 — float64 central differences are well-conditioned here because
+   |B_stent| / |B0| ~ 0.06, which still leaves ~10 significant figures in
+   the magnitude difference.  See ``TestFDStability`` in tests/test_external_field.py.
+
+2. **Complexity**: the analytical Jacobian of the Akoun & Yonnet kernel
+   requires differentiating corner sums of arctan(UV/WR) and ln(U+R) terms
+   through the chain rule, producing expressions at least as long as the
+   kernel itself, with additional special-case handling near R -> 0.
+
+3. **Future path**: if an analytical gradient is ever needed (e.g. for
+   force optimisation in Stage 4), it should be implemented as a separate
+   ``_akoun_yonnet_local_gradient`` kernel in core/field_model.py alongside
+   the field kernel, not here.
 """
 
 from __future__ import annotations
