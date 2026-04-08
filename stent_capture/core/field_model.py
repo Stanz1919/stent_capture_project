@@ -118,10 +118,16 @@ def _akoun_yonnet_local(
         By += eps * My * atan_UW
         Bz += eps * My * (-ln_UpR)
 
+    # The raw corner-sum is the NEGATIVE of the physical field (the derivation
+    # of the Furlani / Akoun & Yonnet kernel accumulates a global sign flip
+    # relative to the H = -∇φ_m convention when the corner signs are
+    # distributed as (-1)^(i+j+k)).  Negating here gives the correct B = μ₀H
+    # in the exterior: verified against the far-field dipole limit where
+    # B_x(along +M axis) → +μ₀m/(2π r³) > 0.
     return (
-        (pre * Bx).reshape(shape),
-        (pre * By).reshape(shape),
-        (pre * Bz).reshape(shape),
+        (-pre * Bx).reshape(shape),
+        (-pre * By).reshape(shape),
+        (-pre * Bz).reshape(shape),
     )
 
 
