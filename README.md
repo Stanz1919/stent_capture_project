@@ -1,10 +1,14 @@
-# stent_capture — Magnetic Stent Field Gradient Analysis
+# stent_capture — Magnetic Stent Cell Capture Modelling
 
-Stage 1 of a 4-stage build-out for modelling magnetic cell capture in
-vascular stents.  Computes the 3-D B-field and gradient magnitude around
-magnetised stent struts using the Akoun & Yonnet (1984) / Furlani (2001)
-closed-form analytical expressions for uniformly magnetised rectangular
-prisms.
+Stages 1–2 of a 4-stage build-out for modelling magnetic SPION-labelled
+endothelial cell capture in vascular stents.
+
+- **Stage 1**: 3-D B-field and gradient magnitude using the Akoun & Yonnet
+  (1984) analytical expressions; external uniform field superposition.
+- **Stage 2**: Magnetic force on SPION-labelled cells; Poiseuille blood flow
+  drag; static capture criterion |F_mag| > |F_drag|; capture maps.
+
+Roadmap: Stage 3 = trajectory integration, Stage 4 = geometry optimisation.
 
 ---
 
@@ -18,26 +22,26 @@ stent_capture_project/
 └── stent_capture/
     ├── core/
     │   ├── field_model.py       # StentRing — 3-D Akoun & Yonnet model
-    │   └── gradient.py          # compute_gradient_magnitude (FD, any field)
+    │   └── gradient.py          # compute_gradient_magnitude/vector (FD)
     ├── physics/
-    │   └── external_field.py    # UniformExternalField + TotalField composer
+    │   ├── external_field.py    # UniformExternalField + TotalField
+    │   ├── magnetic_force.py    # SPIONLabelledCell + magnetic_force()
+    │   ├── hydrodynamics.py     # BloodFlow (Poiseuille) + stokes_drag()
+    │   └── capture_criterion.py # capture_map() + capture_distance()
     ├── figures/
     │   ├── style.py             # shared rcParams (dissertation quality)
-    │   ├── common.py            # DEFAULTS, THRESHOLDS, make_ring(), save_fig()
-    │   ├── fig01_single_strut.py
-    │   ├── fig02_ring_heatmaps.py
-    │   ├── fig03_gradient_vs_distance.py
-    │   ├── fig04_magnetisation_sweep.py
-    │   ├── fig05_strut_dimensions.py
-    │   ├── fig06_n_struts.py
-    │   ├── fig07_gradient_contours.py
-    │   ├── fig08_force_parameter.py
-    │   ├── fig09_axial_profile.py
-    │   ├── fig10_convergence.py
-    │   ├── fig11_rz_heatmap.py
-    │   └── fig12_external_field_comparison.py
+    │   ├── common.py            # DEFAULTS, THRESHOLDS, make_ring()
+    │   ├── fig01_single_strut.py  .. fig11_rz_heatmap.py   # Stage 1
+    │   ├── fig12_external_field_comparison.py               # Stage 1
+    │   ├── fig13_force_parameter.py                         # Stage 1
+    │   ├── fig14_force_vs_distance.py                       # Stage 2
+    │   ├── fig15_drag_vs_velocity.py                        # Stage 2
+    │   └── fig16_capture_map.py                             # Stage 2
     └── tests/
-        └── test_external_field.py
+        ├── test_external_field.py    # 19 tests — Stage 1
+        ├── test_magnetic_force.py    # 15 tests — Stage 2
+        ├── test_hydrodynamics.py     # 12 tests — Stage 2
+        └── test_capture_criterion.py #  9 tests — Stage 2
 ```
 
 ---
@@ -136,7 +140,40 @@ of B0 magnitude.  Typical values:
 | 430 SS   | ~1.2        |
 | Pure Fe  | ~1.7        |
 
-This flag does **not** implement an M(H) hysteresis curve — that is Stage 2.
+This flag does **not** implement an M(H) hysteresis curve — that is deferred.
+
+### Capture force (Stage 2)
+
+The force on a superparamagnetic cell is (Furlani & Ng 2006):
+
+```
+F = (V_spion * chi_spion / mu_0) * |B_total| * nabla|B_total|
+```
+
+Key insight: `|nabla|B_total||` is **reduced** by an axial B0 (B_total rotates
+perpendicular to the stent field, suppressing the projection).  But
+`|B_total|` is increased ~17× by B0 = 0.5 T.  The product — the **force
+parameter** — increases 3–55× depending on distance.  Use `B_magnitude * grad_B`
+not `grad_B` alone to assess capture benefit.
+
+### Blood flow drag
+
+Poiseuille flow in a 1.54 mm radius vessel; Stokes drag:
+
+```
+F_drag = 6 * pi * eta * R_cell * v_blood
+```
+
+### Capture criterion
+
+A cell is captured at position r if:
+
+```
+|F_mag(r)| > |F_drag(r)|
+```
+
+This is the conservative Furlani & Ng (2006) scalar criterion.  Directional
+analysis (Stage 3 trajectories) will extend the capture zone.
 
 ---
 
@@ -156,9 +193,21 @@ This flag does **not** implement an M(H) hysteresis curve — that is Stage 2.
 
 ## Stage roadmap
 
-| Stage | Content                                              | Status      |
-|-------|------------------------------------------------------|-------------|
-| 1     | Package refactor + uniform external field            | **Complete** |
-| 2     | Magnetic force on SPION-labelled cells; M(H) curve  | Planned     |
-| 3     | Cell trajectory integration; capture efficiency     | Planned     |
-| 4     | Geometry optimisation (strut shape, n_struts, R)    | Planned     |
+| Stage | Content                                                      | Status       |
+|-------|--------------------------------------------------------------|--------------|
+| 1     | Package refactor + uniform external field + force parameter  | **Complete** |
+| 2     | Magnetic force (pN); Poiseuille drag; static capture maps    | **Complete** |
+| 3     | Cell trajectory ODE integration; capture efficiency          | Planned      |
+| 4     | Geometry optimisation (strut shape, n_struts, R)             | Planned      |
+
+### Default cell / flow parameters (Stage 2)
+
+| Parameter            | Value          | Description                           |
+|----------------------|----------------|---------------------------------------|
+| Cell radius          | 10 µm          | Typical endothelial cell              |
+| SPION mass           | 10 pg          | Iron oxide per cell (Polyak 2008)     |
+| chi_spion            | 2.0            | SPION material susceptibility         |
+| rho_spion            | 5170 kg/m³     | Magnetite density                     |
+| vessel_radius        | 1.54 mm        | Coronary artery / stent outer surface |
+| mean_velocity        | 0.2 m/s        | Coronary mean flow                    |
+| blood_viscosity      | 4 mPa·s        | Whole blood                           |

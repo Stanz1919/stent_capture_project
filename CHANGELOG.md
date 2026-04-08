@@ -4,6 +4,70 @@ All notable changes are documented here.
 
 ---
 
+## [0.2.0] — 2026-04-09  *(Stage 2)*
+
+### Added
+
+**Physics modules (`stent_capture/physics/`)**
+- `magnetic_force.py`:
+  - `SPIONLabelledCell` — model cell with `radius`, `spion_mass`, `spion_susceptibility`,
+    `spion_density`; `volume` and `spion_volume` properties.  Default: 10 µm radius,
+    10 pg iron oxide (magnetite), χ = 2.0.
+  - `magnetic_force(cell, total_field, points)` — returns (N, 3) force vectors in Newtons
+    using the scalar-gradient approximation F = (V_spion · χ / µ₀) · |B| · ∇|B|
+    (Furlani & Ng 2006).
+- `hydrodynamics.py`:
+  - `BloodFlow` — Poiseuille flow in a cylindrical vessel; `velocity_at`, `shear_rate_at`,
+    `wall_shear_stress`.  Default: R_vessel = 1.54 mm, v_mean = 0.2 m/s, η = 4 mPa·s.
+  - `stokes_drag(cell, blood_flow, points)` — returns (N, 3) drag vectors via
+    F_drag = 6π η R_cell (v_blood − v_cell).
+- `capture_criterion.py`:
+  - `capture_map(cell, total_field, blood_flow, points)` — returns dict with F_mag_vec,
+    F_drag_vec, F_mag, F_drag, margin, captured (Furlani & Ng scalar criterion).
+  - `capture_distance(cell, total_field, blood_flow)` — outermost radius at which
+    |F_mag| ≥ |F_drag|.
+
+**Core gradient (`stent_capture/core/gradient.py`)**
+- `compute_gradient_vector` — new function returning (N, 3) vector gradient ∇|B|;
+  `compute_gradient_magnitude` now delegates to it.
+
+**Figures (`stent_capture/figures/`)**
+- `fig14_force_vs_distance.py` — 2×2: (a/b) |F_mag| vs distance for axial/transverse
+  B0; (c) polar plot of |F_mag| vs angle at 200 µm showing 8-strut periodicity;
+  (d) |F_mag| at 200 µm vs SPION load 1–100 pg.
+- `fig15_drag_vs_velocity.py` — 2×2: (a) Stokes drag vs distance from vessel wall;
+  (b) Poiseuille velocity profile; (c) drag vs velocity with F_mag reference lines;
+  (d) wall shear stress vs velocity with physiological reference bands.
+- `fig16_capture_map.py` — 1×3: 2D cross-section capture maps (|F_mag| − |F_drag|,
+  pN) for v_mean = 0.05, 0.2, 0.5 m/s; B0 = 0.5 T axial; capture boundary contour.
+
+**Tests (`stent_capture/tests/`)**
+- `test_magnetic_force.py` — 15 tests: zero gradient → zero force, force direction
+  toward strut, χ and V_spion linearity, cell properties, order-of-magnitude check.
+- `test_hydrodynamics.py` — 12 tests: Poiseuille profile (centreline, wall, mean),
+  shear rate, Stokes formula and scaling.
+- `test_capture_criterion.py` — 9 tests: dict structure, capture at surface, no
+  capture at centreline, range decreases with velocity, range increases with B0.
+
+Total tests: **57** (all passing).
+
+### Physics notes
+
+- Force uses only SPION volume (not cell volume) × χ_spion: consistent with
+  Furlani & Ng 2006 Eq. 2 and Polyak 2008 experimental regime.
+- Default spion_mass_per_cell = 10e-15 kg (10 pg); force at 100 µm with B0=0.5T ≈ 340 pN.
+- Capture criterion is scalar |F_mag| > |F_drag| (conservative; Stage 3 will
+  use directional trajectory integration).
+- Wall shear stress range 0.5–5 Pa for coronary conditions (v_mean 0.05–0.5 m/s).
+
+### Not included (future stages)
+
+- Cell trajectory ODE integration (Stage 3)
+- Capture efficiency maps (Stage 3)
+- Geometry optimisation (Stage 4)
+
+---
+
 ## [0.1.0] — 2026-04-08  *(Stage 1)*
 
 ### Added

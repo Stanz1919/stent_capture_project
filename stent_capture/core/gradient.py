@@ -94,20 +94,53 @@ def compute_gradient_magnitude(
 
     Six field evaluations per call (one +/− pair per spatial dimension).
     """
+    return np.linalg.norm(compute_gradient_vector(field_func, points, dx=dx), axis=1)
+
+
+def compute_gradient_vector(
+    field_func: Callable[[np.ndarray], np.ndarray],
+    points: np.ndarray,
+    dx: float = 5e-7,
+) -> np.ndarray:
+    """
+    Compute the vector gradient ∇|B(r)| via 3-D central finite differences.
+
+    Parameters
+    ----------
+    field_func : callable
+        ``f(points)`` where *points* has shape ``(N, 3)`` and returns a
+        ``(N, 3)`` array of [Bx, By, Bz] values in Tesla.
+    points : ndarray, shape (N, 3)
+        Observation coordinates [x, y, z] in metres.
+    dx : float, optional
+        Step size for finite differences (m).  Default 500 nm.
+
+    Returns
+    -------
+    grad_vec : ndarray, shape (N, 3)
+        (∂|B|/∂x, ∂|B|/∂y, ∂|B|/∂z) in T/m at each point.
+        ``np.linalg.norm(grad_vec, axis=1)`` recovers ``compute_gradient_magnitude``.
+
+    Notes
+    -----
+    Required by :func:`~stent_capture.physics.magnetic_force.magnetic_force`
+    to obtain both the magnitude and direction of the magnetic force on a
+    SPION-labelled cell.  Six field evaluations per call, same cost as
+    :func:`compute_gradient_magnitude`.
+    """
     pts = np.asarray(points, dtype=float)
     if pts.ndim == 1:
         pts = pts[np.newaxis, :]
 
-    offsets = dx * np.eye(3, dtype=float)  # shape (3, 3): one row per axis
+    offsets = dx * np.eye(3, dtype=float)
+    grad = np.zeros_like(pts)   # (N, 3), T/m
 
-    grad_sq = np.zeros(len(pts))
     for dim in range(3):
         B_plus  = field_func(pts + offsets[dim])   # (N, 3)
         B_minus = field_func(pts - offsets[dim])   # (N, 3)
-        dBmag = (
+        grad[:, dim] = (
             np.linalg.norm(B_plus,  axis=1) -
             np.linalg.norm(B_minus, axis=1)
         ) / (2.0 * dx)
-        grad_sq += dBmag**2
 
-    return np.sqrt(grad_sq)
+    return grad   # (N, 3), T/m
