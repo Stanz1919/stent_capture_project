@@ -12,5 +12,16 @@ integrate_trajectory
 """
 
 from stent_capture.simulation.trajectories import CellTrajectory, integrate_trajectory
+from stent_capture.simulation.capture_efficiency import (
+    sweep_injection_line,
+    capture_efficiency_vs_velocity,
+    capture_efficiency_vs_loading,
+)
 
-__all__ = ["CellTrajectory", "integrate_trajectory"]
+__all__ = [
+    "CellTrajectory",
+    "integrate_trajectory",
+    "sweep_injection_line",
+    "capture_efficiency_vs_velocity",
+    "capture_efficiency_vs_loading",
+]
