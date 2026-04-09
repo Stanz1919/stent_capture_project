@@ -4,6 +4,72 @@ All notable changes are documented here.
 
 ---
 
+## [0.4.0] — 2026-04-09  *(Stage 3b — trajectory bundles and capture efficiency)*
+
+### Added
+
+**Simulation module (`stent_capture/simulation/capture_efficiency.py`)**
+- `sweep_injection_line(cell, total_field, blood_flow, stent_ring, line_start,
+  line_end, n_points=50, n_workers=None, **trajectory_kwargs)`
+  — Integrates `n_points` trajectories with injection positions equally spaced
+  along a 3-D line segment.  Returns `(list[CellTrajectory], summary_dict)`.
+  Summary keys: `n_total`, `n_captured`, `n_escaped`, `n_error`, `efficiency`
+  (float ∈ [0,1]), `injection_points` (ndarray, N×3).
+  Optional `multiprocessing.Pool` parallelisation (`n_workers`; set to 1 for
+  serial / test use).
+- `capture_efficiency_vs_velocity(cell, total_field, stent_ring, velocities,
+  line_start, line_end, n_cells_per_velocity=30, vessel_radius=1.54e-3, ...)`
+  — Sweeps over mean blood-flow velocities; creates a fresh `BloodFlow` per
+  velocity.  Returns dict with `velocities`, `efficiencies`, `n_captured`,
+  `n_total`, `trajectories`.
+- `capture_efficiency_vs_loading(cell_factory, total_field, blood_flow,
+  stent_ring, loadings_kg, line_start, line_end, n_cells_per_loading=30, ...)`
+  — Sweeps over SPION loading per cell via `cell_factory(loading_kg)`.
+  Returns dict with `loadings_kg`, `loadings_pg`, `efficiencies`, `n_captured`,
+  `n_total`, `trajectories`.
+
+**Tests (`stent_capture/tests/test_capture_efficiency.py`)**
+- 5 tests (all passing):
+  1. `TestZeroFieldAllEscape` — M=0 gives efficiency=0, all status='escaped'.
+  2. `TestSummaryIntegrity` — required keys present; counts sum to n_total.
+  3. `TestNonZeroCapture` — 200 pg, v=0.05 m/s near-wall injection gives > 0
+     captured cells.
+  4. `TestVelocityMonotonicity` — efficiency(v=0.02) ≥ efficiency(v=0.50).
+  5. `TestLoadingMonotonicity` — efficiency(200 pg) ≥ efficiency(10 pg).
+
+Total tests: **70** (all passing).
+
+**Figure (`stent_capture/figures/fig19_trajectory_bundle.py`)**
+- Three-panel 3D figure: 20 cells injected radially (r = 0.10–1.45 mm,
+  z = −2 mm), 200 pg SPION loading, B0 = 0.5 T, at three velocities:
+  v̄ = 0.02, 0.10, 0.50 m/s.
+  - Captured cells (blue), escaped (red), injection markers (green).
+  - Strut prisms via Poly3DCollection; lumen boundary rings at z = ±L/2, 0.
+  - Efficiency decreases from 20% → 15% → 10% across the three panels.
+
+**Figure (`stent_capture/figures/fig20_capture_efficiency.py`)**
+- Two-panel efficiency curves using injection line r = 1.20–1.45 mm
+  (magnetically active near-wall region, 20 cells):
+  - (a) Efficiency vs v̄ (0.01–0.50 m/s, log x-axis), fixed 200 pg:
+    100% → 40% monotone decrease; transition near v̄ ≈ 0.03–0.05 m/s.
+  - (b) Efficiency vs SPION loading (5–300 pg, log x-axis), v̄ = 0.05 m/s:
+    25% → 85% monotone increase; clear threshold behaviour between 10–40 pg.
+  - Reference lines: v̄_ref = 0.05 m/s, v̄_MCA = 0.20 m/s (Aaslid 1982);
+    10 pg (Polyak 2008 default), 200 pg (Stage 3a capture case).
+
+### Bug fixed
+
+- `capture_efficiency.py`: `loadings_pg` conversion used factor 1e12 instead
+  of 1e15 (1 pg = 1e-15 kg → multiply by 1e15 to recover pg).  Affected only
+  display labels; physics (loadings_kg) were correct throughout.
+
+### Not included (deferred)
+
+- Stage 3c: fig21 static vs trajectory comparison (requires fig20 sign-off)
+- Point-to-rectangle strut proximity metric (cylindrical approximation retained)
+
+---
+
 ## [0.3.0] — 2026-04-09  *(Stage 3a — single-cell trajectory integration)*
 
 ### Added

@@ -285,7 +285,7 @@ def capture_efficiency_vs_loading(
     line_end   = np.asarray(line_end,   dtype=float)
 
     for i, m in enumerate(loadings_kg):
-        print(f"    loading = {m * 1e12:.1f} pg …", flush=True)
+        print(f"    loading = {m * 1e15:.1f} pg …", flush=True)
         cell = cell_factory(float(m))
         trajs, summary = sweep_injection_line(
             cell, total_field, blood_flow, stent_ring,
@@ -302,7 +302,7 @@ def capture_efficiency_vs_loading(
 
     return {
         'loadings_kg':  loadings_kg,
-        'loadings_pg':  loadings_kg * 1e12,
+        'loadings_pg':  loadings_kg * 1e15,
         'efficiencies': efficiencies,
         'n_captured':   n_captured_arr,
         'n_total':      n_cells_per_loading,
