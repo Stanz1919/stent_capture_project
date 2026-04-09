@@ -4,6 +4,52 @@ All notable changes are documented here.
 
 ---
 
+## [0.5.0] — 2026-04-09  *(Stage 3c — headline static vs trajectory comparison)*
+
+### Added
+
+**Figure (`stent_capture/figures/fig21_static_vs_trajectory.py`)**
+- Two-panel comparison figure — the headline result of the project:
+  - (a) Effective capture range vs SPION loading (10–200 pg, log x-axis)
+    at v̄ = 0.2 m/s (MCA mean), B₀ = 0.5 T.
+  - (b) Effective capture range vs flow velocity (0.02–0.50 m/s, log x-axis)
+    at 50 pg SPION loading, B₀ = 0.5 T.
+  - Both panels: solid blue = static criterion (|F_mag| > |F_drag|,
+    Furlani & Ng 2006); dashed red = trajectory effective capture range.
+  - Trajectory metric: outermost injection distance d at which a strut-aligned
+    cell (injected at (r_inner − d, 0, −2 mm), θ = 0) is captured.  Found by
+    7-step binary search (resolution ≈ 11 µm).  Directly comparable to the
+    static criterion (also evaluated along θ = 0).
+
+**Key numbers (fig21):**
+- At MCA conditions (50 pg, v̄ = 0.2 m/s, B₀ = 0.5 T): trajectory predicts
+  **96.9 µm** effective capture range vs static **6.8 µm** → **14.2× larger**.
+- At v̄ = 0.5 m/s: static predicts 0 µm, trajectory predicts **74.2 µm**
+  (upstream drift dominates).
+- Trajectory-to-static ratio decreases from 14.2× (50 pg) to 3.7× (200 pg)
+  as the static criterion strengthens with higher loading.
+
+**Updates:**
+- `fig19_trajectory_bundle.py`: updated suptitle to note wide injection line
+  is for visualisation; directs reader to fig20 for quantitative efficiency.
+- `README.md`: added "Headline results" section with the key fig21 numbers.
+
+### Method note
+
+Both the static and trajectory predictions are evaluated along the
+strut-aligned axis (θ = 0, where field gradients are strongest).  The binary
+search is deterministic (solve_ivp is deterministic) and monotone in d (closer
+to wall → stronger force, slower axial flow → always at least as likely to
+be captured).  Total fig21 runtime: ~140 s (serial, 90 single-cell
+trajectory integrations).
+
+### Not included (deferred)
+
+- Stage 4: geometry optimisation (n_struts, L, t, M)
+- Angular-average capture efficiency across the full strut period
+
+---
+
 ## [0.4.0] — 2026-04-09  *(Stage 3b — trajectory bundles and capture efficiency)*
 
 ### Added

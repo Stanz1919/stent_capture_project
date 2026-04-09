@@ -200,9 +200,10 @@ def make_figure():
 
     fig.suptitle(
         "Fig 19 — Trajectory bundles: 200 pg SPION-labelled cells, B0 = 0.5 T axial\n"
-        "20 cells injected along a radial line (r = 0.1–1.45 mm, z = −2 mm) "
-        "at three representative blood velocities.  "
-        "Capture efficiency decreases sharply as flow exceeds ~0.1 m/s.",
+        "20 cells injected along a wide radial line (r = 0.1–1.45 mm, z = \u22122 mm) "
+        "for visualisation of trajectory shapes across the full lumen.  "
+        "Most cells start far from the magnetically active near-wall region — see Fig 20 "
+        "for quantitative efficiency in the r = 1.20–1.45 mm near-wall zone.",
         fontsize=9, y=1.01,
     )
     fig.tight_layout(rect=[0, 0.07, 1, 1])

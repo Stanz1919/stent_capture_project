@@ -1,14 +1,50 @@
 # stent_capture — Magnetic Stent Cell Capture Modelling
 
-Stages 1–2 of a 4-stage build-out for modelling magnetic SPION-labelled
-endothelial cell capture in vascular stents.
+Stages 1–3 complete.  Stage 4 (geometry optimisation) planned.
 
 - **Stage 1**: 3-D B-field and gradient magnitude using the Akoun & Yonnet
   (1984) analytical expressions; external uniform field superposition.
 - **Stage 2**: Magnetic force on SPION-labelled cells; Poiseuille blood flow
   drag; static capture criterion |F_mag| > |F_drag|; capture maps.
+- **Stage 3**: Single-cell trajectory integration (scipy solve_ivp, RK45);
+  population capture efficiency vs velocity and SPION loading; direct
+  static-vs-trajectory comparison (fig 21, headline result).
 
-Roadmap: Stage 3 = trajectory integration, Stage 4 = geometry optimisation.
+---
+
+## Headline results
+
+At MCA-representative cerebral flow conditions (v̄ = 0.2 m/s, B₀ = 0.5 T
+axial, 50 pg SPION loading per cell):
+
+- **Trajectory analysis predicts an effective capture range of ~97 µm** from
+  the stent inner surface, defined as the outermost injection radius at which
+  a strut-aligned cell is captured.  The static Furlani & Ng (2006) force-
+  balance criterion predicts only 6.8 µm under the same conditions — a
+  **~14× underestimate** — demonstrating that trajectory integration is
+  essential for quantitative prediction.
+
+- **Near-wall capture efficiency** (injection band r = 1.20–1.45 mm, 20
+  cells): at slow distal flow (v̄ = 0.05 m/s) the efficiency is ~75% at
+  200 pg loading and falls monotonically with both velocity and loading.
+  At MCA mean velocity (v̄ = 0.2 m/s), the near-wall efficiency for 200 pg
+  cells is approximately 50%.
+
+- **The effective capture range increases with loading** from ~51 µm at 10 pg
+  (Polyak 2008 minimum) to ~143 µm at 200 pg (v̄ = 0.2 m/s, B₀ = 0.5 T).
+  The trajectory-to-static ratio grows from 3.7× (200 pg) to ∞ (10 pg, where
+  the static criterion predicts zero capture while trajectory integration
+  confirms finite capture range even at MCA velocity).
+
+- **At higher flow velocities the extension factor grows**: at v̄ = 0.5 m/s
+  the static criterion predicts 0 µm yet trajectory integration finds a
+  ~74 µm capture range for 50 pg cells — the upstream radial drift
+  accumulated over the 2 mm approach trajectory is the dominant mechanism.
+
+These results validate the necessity of trajectory-based analysis over the
+static force-balance approach for physiological flow conditions, consistent
+with the experimental observations of Polyak et al. (2008) and
+Tefft et al. (2014, 2017).
 
 ---
 
