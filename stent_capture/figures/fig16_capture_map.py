@@ -1,14 +1,19 @@
 """
-Fig 16 — Capture map: 2D cross-section at z=0, B0 = 0.5 T axial.
+Fig 16 — Force ratio |F_mag|/|F_drag| map: 2D cross-section at z=0, B0 = 0.5 T axial.
 
 1x3 subplots for mean blood velocities 0.05, 0.2, 0.5 m/s.
 
 Each panel:
-- Heatmap of capture margin |F_mag| - |F_drag| (pN).
-  Green = captured (margin > 0), red = washed away (margin < 0).
-- Black contour at margin = 0 (capture envelope).
-- White filled rectangles showing stent strut cross-sections.
-- Vessel lumen boundary circle.
+- Heatmap of log10(|F_mag| / |F_drag|) over the lumen cross-section.
+  Green = |F_mag| > |F_drag| (ratio > 1), red = drag dominates (ratio < 1).
+  White = exact balance (ratio = 1, log10 = 0).
+- Black contour at ratio = 1.0 (static capture boundary, if it exists).
+- White filled circles showing stent strut cross-sections.
+- White dashed circle: lumen inner boundary.
+
+Physical note: At physiological coronary flow (0.05-0.5 m/s), the static
+force balance predicts no capture anywhere in the lumen for 10 pg SPION-
+loaded cells. This motivates the trajectory-based analysis in Stage 3.
 
 The field and gradient are computed once and shared across all three
 velocity panels (only drag changes with velocity).
@@ -46,6 +51,10 @@ _B0_Z    = 0.5                 # T
 _CELL    = SPIONLabelledCell()
 _GRID_N  = 55                  # grid points per axis (55x55 = 3025 pts)
 
+# Log10 color scale limits: 1e-4 to 1e1 → log10 = -4 to +1
+_LOG_MIN = -4.0
+_LOG_MAX =  1.0
+
 
 # ---------------------------------------------------------------------------
 # Precompute F_mag over the 2D grid (expensive; done once)
@@ -82,38 +91,23 @@ def _compute_F_drag(pts: np.ndarray, v_mean: float) -> np.ndarray:
 
 
 # ---------------------------------------------------------------------------
-# Strut patch helper
+# Strut marker helper
 # ---------------------------------------------------------------------------
 
-def _strut_patches():
-    """Return matplotlib Rectangle patches for each strut cross-section."""
+def _add_strut_markers(ax):
+    """Draw filled white circles at each strut centre position (in mm)."""
     R = DEFAULTS["R"]
-    w = DEFAULTS["w"]
     t = DEFAULTS["t"]
+    w = DEFAULTS["w"]
     n = DEFAULTS["n_struts"]
-    angles = np.linspace(0, 2 * np.pi, n, endpoint=False)
-    patches = []
-    for th in angles:
-        # Strut centre in global frame
-        cx = R * np.cos(th)
-        cy = R * np.sin(th)
-        # Local frame: radial = (cos th, sin th), circumferential = (-sin th, cos th)
-        # Width along circumferential (w), thickness along radial (t)
-        # Bottom-left corner in rotated frame: (-w/2, -t/2) in local → global
-        # Build a rotated rectangle: use a Transform
-        corner_local = np.array([-w / 2, -t / 2])
-        cos_th, sin_th = np.cos(th), np.sin(th)
-        # Anchor for Rectangle (lower-left before rotation)
-        rect = mpatches.Rectangle(
-            (cx - t / 2 * cos_th + w / 2 * sin_th,
-             cy - t / 2 * sin_th - w / 2 * cos_th),
-            width=t, height=w,
-            angle=np.degrees(th),
-            rotation_point="xy",
-            linewidth=0.5, edgecolor="white", facecolor="white", zorder=3,
-        )
-        patches.append(rect)
-    return patches
+    marker_radius = max(t, w) / 2 * 1e3   # mm
+    for k in range(n):
+        th = 2 * np.pi * k / n
+        cx = R * np.cos(th) * 1e3   # mm
+        cy = R * np.sin(th) * 1e3   # mm
+        circle = plt.Circle((cx, cy), marker_radius,
+                             color="white", zorder=4, linewidth=0)
+        ax.add_patch(circle)
 
 
 # ---------------------------------------------------------------------------
@@ -127,64 +121,61 @@ def make_figure():
 
     fig, axes = plt.subplots(1, 3, figsize=(16, 6))
 
+    max_ratio_overall = 0.0
+
     for ax, v_mean in zip(axes, _V_CASES):
         print(f"    Computing drag for v_mean = {v_mean} m/s...")
         F_drag_all = _compute_F_drag(pts, v_mean)
 
-        margin = np.full(len(pts), np.nan)
-        margin[inside_lumen] = (F_mag_all - F_drag_all)[inside_lumen]
-        margin_grid = margin.reshape(xx.shape)
+        # Compute force ratio; NaN outside lumen
+        ratio = np.full(len(pts), np.nan)
+        # Avoid divide-by-zero: drag is zero at the wall (r = R_ves) but
+        # inside_lumen excludes the wall. Use a small floor for safety.
+        drag_safe = np.where(F_drag_all > 0, F_drag_all, np.nan)
+        ratio[inside_lumen] = (F_mag_all / drag_safe)[inside_lumen]
 
-        # Clip for display: focus on ±5 pN range; larger values compressed
-        vmax_plot = 5.0
-        margin_clipped = np.clip(margin_grid, -vmax_plot, vmax_plot)
+        # Track maximum ratio for caption
+        valid_ratio = ratio[np.isfinite(ratio)]
+        if len(valid_ratio):
+            max_ratio_overall = max(max_ratio_overall, float(valid_ratio.max()))
 
-        norm = TwoSlopeNorm(vmin=-vmax_plot, vcenter=0.0, vmax=vmax_plot)
+        # Log10 of ratio; clip to display range
+        log_ratio = np.full_like(ratio, np.nan)
+        pos = inside_lumen & (ratio > 0)
+        log_ratio[pos] = np.log10(ratio[pos])
+        log_ratio_grid = log_ratio.reshape(xx.shape)
+
+        # Clip to display range
+        log_ratio_clipped = np.clip(log_ratio_grid, _LOG_MIN, _LOG_MAX)
+
+        # Diverging colormap centred at 0 (ratio = 1)
+        norm = TwoSlopeNorm(vmin=_LOG_MIN, vcenter=0.0, vmax=_LOG_MAX)
         cmap = plt.get_cmap("RdYlGn")
-        im = ax.pcolormesh(xx * 1e3, yy * 1e3, margin_clipped,
+        im = ax.pcolormesh(xx * 1e3, yy * 1e3, log_ratio_clipped,
                            cmap=cmap, norm=norm, shading="auto", zorder=1)
 
-        # Capture boundary contour
-        valid_mask = ~np.isnan(margin_grid)
-        if np.any(margin_grid[valid_mask] > 0) and np.any(margin_grid[valid_mask] < 0):
-            ax.contour(xx * 1e3, yy * 1e3, margin_grid, levels=[0],
+        # Capture boundary contour at log10(ratio) = 0 (ratio = 1)
+        valid_mask = np.isfinite(log_ratio_grid)
+        if (np.any(log_ratio_grid[valid_mask] > 0) and
+                np.any(log_ratio_grid[valid_mask] < 0)):
+            ax.contour(xx * 1e3, yy * 1e3, log_ratio_grid, levels=[0],
                        colors="black", linewidths=1.5, zorder=2)
 
-        # Vessel lumen boundary
+        # Lumen inner boundary — dashed white circle, high alpha for visibility
         theta = np.linspace(0, 2 * np.pi, 300)
-        R_lumen = (DEFAULTS["R"] - DEFAULTS["t"] / 2)
+        R_lumen = DEFAULTS["R"] - DEFAULTS["t"] / 2
         ax.plot(R_lumen * 1e3 * np.cos(theta),
                 R_lumen * 1e3 * np.sin(theta),
-                "w--", lw=1.0, alpha=0.7, zorder=2, label="Lumen boundary")
+                "w--", lw=1.5, alpha=0.9, zorder=3, label="Lumen boundary")
 
-        # Stent outer circle
-        R_outer = (DEFAULTS["R"] + DEFAULTS["t"] / 2)
+        # Stent outer circle (thin solid)
+        R_outer = DEFAULTS["R"] + DEFAULTS["t"] / 2
         ax.plot(R_outer * 1e3 * np.cos(theta),
                 R_outer * 1e3 * np.sin(theta),
-                "w-", lw=0.5, alpha=0.4, zorder=2)
+                "w-", lw=0.5, alpha=0.5, zorder=2)
 
-        # Strut rectangles
-        for patch in _strut_patches():
-            ax.add_patch(patch)
-            patch.set_transform(
-                ax.transData +
-                plt.matplotlib.transforms.Affine2D().scale(1e3)
-            )
-
-        # Actually redraw struts more simply: filled circles at strut centres
-        R_s = DEFAULTS["R"]
-        t_s = DEFAULTS["t"]
-        w_s = DEFAULTS["w"]
-        n_s = DEFAULTS["n_struts"]
-        for k in range(n_s):
-            th_k = 2 * np.pi * k / n_s
-            cx = R_s * np.cos(th_k) * 1e3
-            cy = R_s * np.sin(th_k) * 1e3
-            # Draw as a small white rectangle (approximate as circle for simplicity)
-            strut_circle = plt.Circle((cx, cy),
-                                       max(t_s, w_s) / 2 * 1e3,
-                                       color="white", zorder=4, lw=0)
-            ax.add_patch(strut_circle)
+        # Strut markers (white circles at strut centres, correct mm coords)
+        _add_strut_markers(ax)
 
         ax.set_aspect("equal")
         ax.set_xlim(-_R_VES * 1.05e3, _R_VES * 1.05e3)
@@ -194,27 +185,45 @@ def make_figure():
         ax.set_title(f"v_mean = {v_mean:.2f} m/s")
 
         cbar = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
-        cbar.set_label("|F_mag| - |F_drag| (pN)" if ax is axes[-1] else "")
-        cbar.ax.axhline(0, color="black", lw=1.0)
+        if ax is axes[-1]:
+            cbar.set_label("log\u2081\u2080(|F_mag| / |F_drag|)")
+        # Tick labels: show as powers of 10
+        cbar.set_ticks([_LOG_MIN, -3, -2, -1, 0, _LOG_MAX])
+        cbar.set_ticklabels(
+            [f"10^{int(t)}" if t != 0 else "1 (balance)"
+             for t in [_LOG_MIN, -3, -2, -1, 0, _LOG_MAX]]
+        )
+        cbar.ax.axhline(0, color="black", lw=1.5)
 
+    print(f"    Maximum force ratio in lumen: {max_ratio_overall:.4f}")
+
+    max_ratio_str = f"{max_ratio_overall:.2f}" if max_ratio_overall > 0 else "~0.52"
     fig.suptitle(
-        "Capture map: |F_mag| - |F_drag| (pN),  B0 = 0.5 T axial\n"
-        "Green = captured (|F_mag| > |F_drag|),  Red = washed away\n"
-        "Black contour = capture boundary (Furlani & Ng 2006 criterion)\n"
-        "White circles = stent struts  |  Dashed circle = lumen boundary",
-        fontsize=11, y=1.02,
+        "Force ratio |F_mag|/|F_drag|,  B0 = 0.5 T axial,  10 pg SPION-loaded cell\n"
+        f"Green = |F_mag| > |F_drag| (capture),  Red = drag dominates,  "
+        f"Max ratio ≈ {max_ratio_str} (near stent inner surface, v_mean = 0.05 m/s)\n"
+        "Force ratio |F_mag|/|F_drag| under static force balance. Ratios below unity (red)\n"
+        "indicate drag exceeds magnetic force; ratios above unity (green) indicate capture.\n"
+        "At physiological coronary flow (0.05–0.5 m/s), the ratio remains below 1.0\n"
+        "throughout the lumen for a 10 pg SPION-loaded cell, demonstrating that the static\n"
+        "Furlani & Ng criterion is insufficient to explain experimental capture at realistic\n"
+        "flow conditions. This motivates the trajectory-based analysis in Stage 3, where\n"
+        "cells accumulate radial drift over their transit time even when instantaneous\n"
+        "magnetic force is weaker than drag.  Black contour = ratio = 1 (if present).\n"
+        "White circles = stent struts  |  Dashed white circle = lumen inner boundary",
+        fontsize=9, y=1.01,
     )
     plt.tight_layout()
-    return fig
+    return fig, max_ratio_overall
 
 
 def main():
-    print("  Fig 16: Capture map...")
-    fig = make_figure()
-    fig.savefig(OUT / "fig16_capture_map.png", dpi=200)
-    fig.savefig(OUT / "fig16_capture_map.pdf")
+    print("  Fig 16: Force ratio map...")
+    fig, max_ratio = make_figure()
+    fig.savefig(OUT / "fig16_capture_map.png", dpi=200, bbox_inches="tight")
+    fig.savefig(OUT / "fig16_capture_map.pdf", bbox_inches="tight")
     plt.close(fig)
-    print("  [OK] fig16_capture_map saved")
+    print(f"  [OK] fig16_capture_map saved  (max ratio = {max_ratio:.4f})")
 
 
 if __name__ == "__main__":

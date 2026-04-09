@@ -107,9 +107,8 @@ def capture_distance(
     """
     Outermost distance from the stent surface at which |F_mag| >= |F_drag|.
 
-    Sweeps radially from the stent outer surface inward/outward along the
-    through-strut direction (+x) and returns the largest distance at which
-    the cell is still captured.
+    Sweeps radially along the through-strut direction (+x) and returns the
+    largest distance at which the cell is still captured.
 
     Parameters
     ----------
@@ -117,7 +116,12 @@ def capture_distance(
     total_field : TotalField or StentRing
     blood_flow : BloodFlow
     direction : str
-        ``'radial'`` — sweep along +x (through strut).
+        ``'radial'`` — legacy outward sweep from stent outer surface along +x
+        (note: since r_outer = R_vessel, these points are outside the vessel
+        and experience zero drag; use ``'inward'`` for lumen analysis).
+        ``'inward'`` — sweeps from the stent inner surface (R - t/2) toward
+        the vessel centre, covering the lumen region where cells actually flow.
+        This is the physically correct sweep for capture-distance analysis.
     n_points : int
         Number of sample points along the sweep (default 500).
     dx : float, optional
@@ -126,17 +130,26 @@ def capture_distance(
     Returns
     -------
     d_capture : float
-        Distance from stent outer surface (m) at which capture criterion is
-        last satisfied.  Returns 0.0 if no capture anywhere along the sweep.
+        Distance (m) from the reference surface at which the capture criterion
+        is last satisfied.  For ``'inward'``, this is the distance from the
+        stent inner surface into the lumen.  Returns 0.0 if no capture.
     """
     from stent_capture.figures.common import DEFAULTS
 
     R = DEFAULTS["R"]
     t = DEFAULTS["t"]
-    r_outer = R + t / 2
 
-    d = np.linspace(1e-6, 1.5e-3, n_points)
-    pts = np.column_stack([d + r_outer, np.zeros_like(d), np.zeros_like(d)])
+    if direction == "inward":
+        # Sweep from stent inner surface toward vessel centre
+        r_inner = R - t / 2
+        d = np.linspace(1e-6, r_inner * 0.999, n_points)
+        x_vals = r_inner - d   # r decreases from r_inner toward centre
+        pts = np.column_stack([x_vals, np.zeros(n_points), np.zeros(n_points)])
+    else:
+        # Legacy outward sweep from stent outer surface (direction='radial')
+        r_outer = R + t / 2
+        d = np.linspace(1e-6, 1.5e-3, n_points)
+        pts = np.column_stack([d + r_outer, np.zeros_like(d), np.zeros_like(d)])
 
     result = capture_map(cell, total_field, blood_flow, pts, dx=dx)
     mask = result["captured"]

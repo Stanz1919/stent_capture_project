@@ -204,3 +204,100 @@ class TestCaptureRangeVsB0:
             f"B0=1.0T should extend capture distance vs B0=0.5T "
             f"(got {d_B0_10*1e6:.1f} vs {d_B0_05*1e6:.1f} µm)"
         )
+
+
+# ===========================================================================
+# Test 6: Maximum force ratio in lumen < 1.0 at physiological flow (Fig 16)
+# ===========================================================================
+
+class TestNoStaticCapturePhysiological:
+    """
+    Documents the key finding visualised in Fig 16: at physiological coronary
+    flow (v_mean = 0.05 m/s, the slowest case), the static Furlani & Ng force
+    balance criterion is NEVER satisfied anywhere in the lumen for a 10 pg
+    SPION-loaded cell with B0 = 0.5 T axial.
+
+    The maximum force ratio |F_mag|/|F_drag| is between 0.01 and 1.0, meaning
+    drag always exceeds magnetic force by at least one order of magnitude in
+    the lumen interior (away from the stent surface).
+
+    This test prevents silent regression if parameters (SPION mass, flow,
+    B0) are changed later, and motivates Stage 3 trajectory integration.
+    """
+
+    def test_max_force_ratio_below_unity_at_slow_flow(self):
+        """Max |F_mag|/|F_drag| in lumen < 1.0 at v_mean=0.05 m/s, B0=0.5T."""
+        ring = _make_ring()
+        tf = TotalField(ring, UniformExternalField([0.0, 0.0, 0.5]))
+        cell = _default_cell()
+        flow = _default_flow(mean_velocity=0.05)
+
+        # Sample a radial line inside the lumen (from near stent surface to centre)
+        R = _STENT["R"]
+        t = _STENT["t"]
+        r_lumen = R - t / 2        # stent inner surface
+        r_vals = np.linspace(10e-6, r_lumen - 10e-6, 50)
+        pts = np.column_stack([r_vals, np.zeros_like(r_vals), np.zeros_like(r_vals)])
+
+        result = capture_map(cell, tf, flow, pts)
+        ratio = result["F_mag"] / np.where(result["F_drag"] > 0, result["F_drag"], np.inf)
+        max_ratio = float(ratio.max())
+
+        assert max_ratio < 1.0, (
+            f"Static force balance should predict NO capture in lumen at "
+            f"v_mean=0.05 m/s; expected max ratio < 1.0, got {max_ratio:.4f}. "
+            "If this fails, parameters changed significantly — update Fig 16 caption."
+        )
+        assert max_ratio > 0.01, (
+            f"Max ratio unexpectedly low ({max_ratio:.6f}); check SPION parameters."
+        )
+
+
+# ===========================================================================
+# Test 7: Capture distance is monotonically non-decreasing with SPION loading
+# ===========================================================================
+
+class TestLoadingSweep:
+    """
+    Documents the SPION loading sweep analysed in Fig 17.
+    Uses direction='inward' so the sweep covers the actual lumen region
+    (r < R - t/2) where cells flow.
+    """
+
+    def test_capture_distance_monotonic_in_loading(self):
+        """Capture distance increases monotonically with SPION loading."""
+        ring = _make_ring()
+        tf = TotalField(ring, UniformExternalField([0.0, 0.0, 0.5]))
+        loadings = [10e-15, 30e-15, 100e-15, 300e-15]   # kg
+        flow = _default_flow(mean_velocity=0.05)
+
+        distances = []
+        for m in loadings:
+            cell = SPIONLabelledCell(spion_mass_per_cell=m)
+            d = capture_distance(cell, tf, flow, direction="inward")
+            distances.append(d)
+
+        for i in range(len(distances) - 1):
+            assert distances[i + 1] >= distances[i], (
+                f"Capture distance should be non-decreasing with loading: "
+                f"{loadings[i]*1e15:.0f} pg → {distances[i]*1e6:.1f} µm, "
+                f"{loadings[i+1]*1e15:.0f} pg → {distances[i+1]*1e6:.1f} µm"
+            )
+
+    def test_capture_distance_positive_at_100pg(self):
+        """
+        At 100 pg SPION loading with v_mean=0.05 m/s and B0=0.5T, there should
+        be meaningful capture (> 50 µm from stent inner surface). This confirms
+        that static capture is physically predicted in the upper experimental
+        loading regime and that the code is not accidentally returning zero.
+        """
+        ring = _make_ring()
+        tf = TotalField(ring, UniformExternalField([0.0, 0.0, 0.5]))
+        cell = SPIONLabelledCell(spion_mass_per_cell=100e-15)
+        flow = _default_flow(mean_velocity=0.05)
+
+        d = capture_distance(cell, tf, flow, direction="inward")
+        assert d > 50e-6, (
+            f"Expected capture distance > 50 µm at 100 pg, v=0.05 m/s, B0=0.5T; "
+            f"got {d*1e6:.1f} µm. Check SPION parameters and field model."
+        )

@@ -4,6 +4,60 @@ All notable changes are documented here.
 
 ---
 
+## [0.2.1] — 2026-04-09  *(Stage 2.5 — SPION loading sweep)*
+
+### Added
+
+**Figure (`stent_capture/figures/`)**
+- `fig17_spion_loading_sweep.py` — 2×1: (a) capture distance from stent inner
+  surface vs SPION loading (1–300 pg, log-spaced), three velocities, B0 = 0.5 T
+  axial; overlays for inter-strut half-distance (589 µm), lumen radius (1460 µm),
+  literature benchmark loadings (10/50/200 pg), and experimental range band
+  (30–100 pg). (b) force ratio |F_mag|/|F_drag| at 5 µm from stent inner surface
+  vs loading, log–log, with ratio = 1 threshold line.
+  Field and gradient are precomputed once along the radial line; loading/velocity
+  loops only scale the precomputed force-parameter array.
+
+**Tests (`stent_capture/tests/test_capture_criterion.py`)**
+- `TestLoadingSweep::test_capture_distance_monotonic_in_loading` — capture
+  distance (inward sweep) is non-decreasing over 10→30→100→300 pg at v=0.05 m/s.
+- `TestLoadingSweep::test_capture_distance_positive_at_100pg` — capture distance
+  > 50 µm at 100 pg, v=0.05 m/s, B0=0.5T (validates non-trivial capture exists
+  in upper experimental loading regime; actual value ≈ 56.5 µm).
+
+Total tests: **60** (all passing).
+
+### Changed
+
+**`stent_capture/physics/capture_criterion.py`**
+- `capture_distance()` gains `direction='inward'` option: sweeps from the stent
+  inner surface (R − t/2) toward the vessel centre, which is the physically
+  correct lumen geometry for capture-distance analysis.  The legacy `'radial'`
+  mode (default, sweeps outward from stent outer surface) is preserved for
+  backward compatibility.
+
+### Physics notes — Stage 2.5 results
+
+Capture distance table (µm from stent inner surface, B0 = 0.5 T axial):
+
+| Loading | v = 0.05 m/s | v = 0.20 m/s | v = 0.50 m/s |
+|---------|-------------|-------------|-------------|
+| 10 pg   | 0 µm        | 0 µm        | 0 µm        |
+| 50 pg   | 38.5 µm     | 5.7 µm      | 0 µm        |
+| 200 pg  | 71.4 µm     | 38.5 µm     | 20.3 µm     |
+
+- Static capture is only predicted above ~19 pg at the slowest flow (0.05 m/s).
+- A capture distance of 100 µm is not reached within the 1–300 pg sweep range
+  at any of the three physiological velocities.
+- The 8-strut stent geometry concentrates capture within ~70 µm of the stent
+  inner surface even at 200 pg; inter-strut half-distance (589 µm) and lumen
+  radius (1460 µm) are far beyond the static capture envelope.
+- These constraints motivate Stage 3: trajectory-based capture can be
+  substantially larger than the static criterion predicts, as cells accumulate
+  radial displacement over their transit time through the stent.
+
+---
+
 ## [0.2.0] — 2026-04-09  *(Stage 2)*
 
 ### Added
@@ -38,18 +92,23 @@ All notable changes are documented here.
 - `fig15_drag_vs_velocity.py` — 2×2: (a) Stokes drag vs distance from vessel wall;
   (b) Poiseuille velocity profile; (c) drag vs velocity with F_mag reference lines;
   (d) wall shear stress vs velocity with physiological reference bands.
-- `fig16_capture_map.py` — 1×3: 2D cross-section capture maps (|F_mag| − |F_drag|,
-  pN) for v_mean = 0.05, 0.2, 0.5 m/s; B0 = 0.5 T axial; capture boundary contour.
+- `fig16_capture_map.py` — 1×3: 2D cross-section force ratio |F_mag|/|F_drag|
+  maps (log₁₀ scale) for v_mean = 0.05, 0.2, 0.5 m/s; B0 = 0.5 T axial.
+  Diverging colormap (red = drag dominates, green = mag dominates, white = balance).
+  Static force balance yields no capture anywhere in the lumen at physiological
+  coronary flow for 10 pg SPION-loaded cells.
 
 **Tests (`stent_capture/tests/`)**
 - `test_magnetic_force.py` — 15 tests: zero gradient → zero force, force direction
   toward strut, χ and V_spion linearity, cell properties, order-of-magnitude check.
 - `test_hydrodynamics.py` — 12 tests: Poiseuille profile (centreline, wall, mean),
   shear rate, Stokes formula and scaling.
-- `test_capture_criterion.py` — 9 tests: dict structure, capture at surface, no
-  capture at centreline, range decreases with velocity, range increases with B0.
+- `test_capture_criterion.py` — 10 tests: dict structure, capture at surface, no
+  capture at centreline, range decreases with velocity, range increases with B0;
+  new test documenting that max |F_mag|/|F_drag| < 1.0 in lumen at v_mean=0.05 m/s
+  (regression guard for the no-static-capture finding).
 
-Total tests: **57** (all passing).
+Total tests: **58** (all passing).
 
 ### Physics notes
 
@@ -59,6 +118,12 @@ Total tests: **57** (all passing).
 - Capture criterion is scalar |F_mag| > |F_drag| (conservative; Stage 3 will
   use directional trajectory integration).
 - Wall shear stress range 0.5–5 Pa for coronary conditions (v_mean 0.05–0.5 m/s).
+- **Static force balance yields no capture at physiological flow**: at v_mean =
+  0.05–0.5 m/s, Stokes drag (nN scale) exceeds magnetic force (pN–nN) throughout
+  the lumen for 10 pg SPION-loaded cells. Maximum force ratio at v_mean = 0.05 m/s
+  with B0 = 0.5 T is ≈ 0.52 (< 1.0 everywhere in the lumen). This motivates Stage 3
+  trajectory integration, where cells accumulate radial drift over their transit
+  time even when the instantaneous magnetic force is weaker than drag.
 
 ### Not included (future stages)
 
