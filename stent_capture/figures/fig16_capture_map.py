@@ -11,7 +11,7 @@ Each panel:
 - White filled circles showing stent strut cross-sections.
 - White dashed circle: lumen inner boundary.
 
-Physical note: At physiological coronary flow (0.05-0.5 m/s), the static
+Physical note: At cerebral arterial flow velocities (0.05-0.5 m/s, MCA-representative), the static
 force balance predicts no capture anywhere in the lumen for 10 pg SPION-
 loaded cells. This motivates the trajectory-based analysis in Stage 3.
 
@@ -204,10 +204,11 @@ def make_figure():
         f"Max ratio ≈ {max_ratio_str} (near stent inner surface, v_mean = 0.05 m/s)\n"
         "Force ratio |F_mag|/|F_drag| under static force balance. Ratios below unity (red)\n"
         "indicate drag exceeds magnetic force; ratios above unity (green) indicate capture.\n"
-        "At physiological coronary flow (0.05–0.5 m/s), the ratio remains below 1.0\n"
-        "throughout the lumen for a 10 pg SPION-loaded cell, demonstrating that the static\n"
-        "Furlani & Ng criterion is insufficient to explain experimental capture at realistic\n"
-        "flow conditions. This motivates the trajectory-based analysis in Stage 3, where\n"
+        "At cerebral arterial flow velocities (0.05–0.5 m/s, MCA-representative;\n"
+        "Aaslid et al. 1982), the ratio remains below 1.0 throughout the lumen\n"
+        "for a 10 pg SPION-loaded cell, demonstrating that the static Furlani & Ng\n"
+        "criterion is insufficient to explain experimental capture at realistic flow\n"
+        "conditions. This motivates the trajectory-based analysis in Stage 3, where\n"
         "cells accumulate radial drift over their transit time even when instantaneous\n"
         "magnetic force is weaker than drag.  Black contour = ratio = 1 (if present).\n"
         "White circles = stent struts  |  Dashed white circle = lumen inner boundary",

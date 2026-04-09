@@ -158,11 +158,22 @@ not `grad_B` alone to assess capture benefit.
 
 ### Blood flow drag
 
-Poiseuille flow in a 1.54 mm radius vessel; Stokes drag:
+Poiseuille flow in a 1.54 mm radius vessel (cerebral arterial / M1-segment
+MCA-representative); Stokes drag:
 
 ```
 F_drag = 6 * pi * eta * R_cell * v_blood
 ```
+
+### Vessel geometry and flow parameters
+
+The model represents an M1-segment cerebral artery (vessel diameter ~3 mm,
+mean velocity 0.2 m/s; Aaslid et al. 1982).  Parameters can be adjusted for
+smaller distal vessels (M2/M3, ~1.5–2 mm diameter, 0.1–0.15 m/s) where
+flow-diverter stents are commonly deployed.
+
+The velocity range 0.05–0.5 m/s covers distal small vessels through MCA peak
+systolic flow.
 
 ### Capture criterion
 
@@ -208,6 +219,6 @@ analysis (Stage 3 trajectories) will extend the capture zone.
 | SPION mass           | 10 pg          | Iron oxide per cell (Polyak 2008)     |
 | chi_spion            | 2.0            | SPION material susceptibility         |
 | rho_spion            | 5170 kg/m³     | Magnetite density                     |
-| vessel_radius        | 1.54 mm        | Coronary artery / stent outer surface |
-| mean_velocity        | 0.2 m/s        | Coronary mean flow                    |
+| vessel_radius        | 1.54 mm        | Cerebral artery (MCA) / stent outer surface |
+| mean_velocity        | 0.2 m/s        | MCA mean flow (Aaslid et al. 1982)    |
 | blood_viscosity      | 4 mPa·s        | Whole blood                           |

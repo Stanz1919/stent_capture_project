@@ -109,8 +109,8 @@ def make_figure():
     wss_vs_v = np.array([
         _make_flow(v).wall_shear_stress for v in v_range
     ])
-    # Clinical reference ranges for coronary (Malek et al. 1999)
-    # Atheroprotective: 1.5-2.5 Pa; Atherogenic: < 0.4 Pa; High: > 7 Pa
+    # Wall shear stress reference ranges for cerebral arteries
+    # Atheroprotective: 1.5-7 Pa; Atherogenic (low): < 0.4 Pa
 
     # -----------------------------------------------------------------------
     # Plot
@@ -173,7 +173,8 @@ def make_figure():
 
     fig.suptitle(
         "Hydrodynamic drag on a 10 µm endothelial cell in Poiseuille blood flow\n"
-        "(vessel R = 1.54 mm, viscosity = 4 mPa·s, density = 1060 kg/m³)\n"
+        "(vessel R = 1.54 mm, viscosity = 4 mPa·s, density = 1060 kg/m³ — "
+        "cerebral arterial / MCA-representative; Aaslid et al. 1982)\n"
         "Stent inner surface at r = R - t/2 = 1.46 mm",
         fontsize=11, y=1.01,
     )

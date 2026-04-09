@@ -7,14 +7,19 @@ Models the viscous drag on a spherical cell (Stokes regime) moving through
 a Newtonian fluid with a Poiseuille velocity profile.  This is the dominant
 competing force to magnetic capture at the stent surface.
 
-Default parameters represent a coronary artery:
-- Vessel radius 1.54 mm (matching stent outer surface)
-- Mean velocity 0.2 m/s (Womersley number ~ 2, quasi-steady Poiseuille
-  is a reasonable approximation for time-averaged analysis)
+Default parameters represent a cerebral arterial vessel (M1-segment MCA-
+representative):
+- Vessel radius 1.54 mm (matching stent outer surface; ~3 mm diameter)
+- Mean velocity 0.2 m/s (MCA mean ~0.2 m/s; Aaslid et al. 1982)
+  Womersley number ~ 2, quasi-steady Poiseuille is a reasonable
+  approximation for time-averaged analysis.
 - Blood viscosity 4 mPa·s (whole blood, hematocrit ~40%)
 
 References
 ----------
+Aaslid, R. et al. (1982). Noninvasive transcranial Doppler ultrasound
+    recording of flow velocity in basal cerebral arteries.
+    Journal of Neurosurgery, 57(6), 769-774.
 Womersley, J.R. (1955). Method for the calculation of velocity, rate of flow
     and viscous drag in arteries when the pressure gradient is known.
     Journal of Physiology, 127, 553-563.
@@ -58,7 +63,8 @@ class BloodFlow:
     vessel_radius : float
         Vessel radius (m).  Default 1.54e-3 m (matches stent outer surface).
     mean_velocity : float
-        Cross-sectional mean velocity (m/s).  Default 0.2 m/s (coronary).
+        Cross-sectional mean velocity (m/s).  Default 0.2 m/s (MCA mean;
+        Aaslid et al. 1982).
     viscosity : float
         Dynamic viscosity of blood (Pa·s).  Default 4e-3 (whole blood).
     density : float

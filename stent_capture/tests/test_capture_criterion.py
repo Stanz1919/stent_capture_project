@@ -212,7 +212,7 @@ class TestCaptureRangeVsB0:
 
 class TestNoStaticCapturePhysiological:
     """
-    Documents the key finding visualised in Fig 16: at physiological coronary
+    Documents the key finding visualised in Fig 16: at cerebral arterial
     flow (v_mean = 0.05 m/s, the slowest case), the static Furlani & Ng force
     balance criterion is NEVER satisfied anywhere in the lumen for a 10 pg
     SPION-loaded cell with B0 = 0.5 T axial.

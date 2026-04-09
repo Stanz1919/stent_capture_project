@@ -96,7 +96,7 @@ Capture distance table (µm from stent inner surface, B0 = 0.5 T axial):
   maps (log₁₀ scale) for v_mean = 0.05, 0.2, 0.5 m/s; B0 = 0.5 T axial.
   Diverging colormap (red = drag dominates, green = mag dominates, white = balance).
   Static force balance yields no capture anywhere in the lumen at physiological
-  coronary flow for 10 pg SPION-loaded cells.
+  cerebral arterial flow for 10 pg SPION-loaded cells.
 
 **Tests (`stent_capture/tests/`)**
 - `test_magnetic_force.py` — 15 tests: zero gradient → zero force, force direction
@@ -117,7 +117,7 @@ Total tests: **58** (all passing).
 - Default spion_mass_per_cell = 10e-15 kg (10 pg); force at 100 µm with B0=0.5T ≈ 340 pN.
 - Capture criterion is scalar |F_mag| > |F_drag| (conservative; Stage 3 will
   use directional trajectory integration).
-- Wall shear stress range 0.5–5 Pa for coronary conditions (v_mean 0.05–0.5 m/s).
+- Wall shear stress range 0.5–5 Pa for cerebral arterial conditions (v_mean 0.05–0.5 m/s).
 - **Static force balance yields no capture at physiological flow**: at v_mean =
   0.05–0.5 m/s, Stokes drag (nN scale) exceeds magnetic force (pN–nN) throughout
   the lumen for 10 pg SPION-loaded cells. Maximum force ratio at v_mean = 0.05 m/s

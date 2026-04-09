@@ -261,7 +261,8 @@ def make_figure():
     fig.suptitle(
         "SPION loading parameter sweep  —  B0 = 0.5 T axial, 8-strut stent, R = 1.5 mm\n"
         "Static Furlani & Ng criterion: |F_mag| > |F_drag|  (Stage 3 will extend to trajectories)\n"
-        "Cell: 10 µm radius, χ = 2.0, magnetite (5170 kg/m³);  vessel R = 1.54 mm, η = 4 mPa·s",
+        "Cell: 10 µm radius, χ = 2.0, magnetite (5170 kg/m³);  vessel R = 1.54 mm, η = 4 mPa·s\n"
+        "Cerebral arterial / MCA-representative flow (Aaslid et al. 1982)",
         fontsize=10, y=1.02,
     )
     plt.tight_layout()
