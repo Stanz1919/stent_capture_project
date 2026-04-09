@@ -4,6 +4,76 @@ All notable changes are documented here.
 
 ---
 
+## [0.3.0] — 2026-04-09  *(Stage 3a — single-cell trajectory integration)*
+
+### Added
+
+**Simulation module (`stent_capture/simulation/`)**
+- `trajectories.py`:
+  - `CellTrajectory` — result object storing `positions` (N×3), `times` (N),
+    `status` ('captured'/'escaped'/'error'), and references to `cell`,
+    `total_field`, `blood_flow`.  Properties: `capture_position`,
+    `capture_time`, `velocities` (batched v_blood + F_mag/drag_coeff).
+  - `integrate_trajectory(cell, total_field, blood_flow, stent_ring, r_inject, ...)`
+    — integrates the terminal-velocity ODE
+    `dr/dt = v_blood(r) + F_mag(r) / (6π η R_cell)` using
+    `scipy.integrate.solve_ivp` (RK45, rtol=1e-6, atol=1e-9).
+    Three event-based termination conditions: escape (z ≥ z_end), strut
+    proximity (3D distance to any strut centre < max(w,t)/2 + tolerance;
+    cylindrical approximation — flagged for point-to-rectangle refinement
+    in Stage 3b), wall contact (r_xy ≥ R − t/2).  Optional `max_step`
+    parameter for denser output on smooth trajectories.
+
+**Tests (`stent_capture/tests/test_trajectories.py`)**
+- 5 tests:
+  1. `TestStraightLineFlow` — zero magnetisation gives zero lateral drift
+     (x, y within 100 nm) and z terminates at z_end (within 1 µm).
+  2. `TestPoiseuillVelocity` — axial velocity at 10 intermediate points
+     matches Poiseuille prediction to 0.1% (`max_step=1e-3` forces output).
+  3. `TestCaptureNearStrut` — 200 pg cell at r = R−t/2−5 µm is captured,
+     with capture radius within 20 µm of stent inner surface.
+  4. `TestEscapeHighFlow` — centreline cell (10 pg, v=0.5 m/s) escapes.
+  5. `TestTimeoutSafety` — max_time=0.01 s terminates with status='error',
+     t_final ≤ 0.012 s (guards against hanging on slow-flow edge cases).
+
+Total tests: **65** (all passing).
+
+**Figure (`stent_capture/figures/fig18_single_trajectory.py`)**
+- Three-panel figure comparing two trajectories from identical injection
+  (1.3 mm, 0, −2 mm), v_mean = 0.05 m/s, B0 = 0.5 T, differing only in
+  SPION loading.
+  - (a) 3D view: struts as semi-transparent Poly3DCollection prisms; primary
+    (200 pg, blue, captured at 62.3 ms) with 20 time markers and red-star
+    capture point; secondary (10 pg, red, escaped) as line only.
+  - (b) x-z side view: stent band shaded, lumen boundary dashed.
+  - (c) Time series (primary only): r(t) in µm, |v_cell| in mm/s,
+    |F_mag| in pN (log scale).
+
+**Dependency** — `scipy` added (required for `solve_ivp`).
+
+### Physics notes — Stage 3a results
+
+- **Trajectory vs static criterion**: at 200 pg, v=0.05 m/s, the cell
+  starts at r=1.3 mm (160 µm inside the lumen from the stent inner surface).
+  The static criterion (Stage 2.5) predicts no capture at this distance
+  (static capture distance = 71.4 µm < 160 µm).  Trajectory integration
+  shows capture at t = 62.3 ms: the cell accumulates radial drift as it
+  approaches the stent axially, enabling capture from ~2× further than the
+  static criterion.  This is the key motivation for Stage 3b (capture
+  efficiency over a distribution of injection radii).
+- **10 pg cell escapes** at the same conditions, confirming SPION loading
+  is the critical parameter at this flow velocity.
+- **Terminal-velocity approximation** is valid: cell Re ≈ 0.5 ≪ 1, so
+  inertia is negligible and the first-order ODE is physically appropriate.
+
+### Not included (deferred to Stage 3b/3c)
+
+- Capture efficiency over a distribution of injection radii (Stage 3b)
+- Static vs trajectory comparison figure (Stage 3c)
+- Point-to-rectangle strut proximity metric (Stage 3b refinement)
+
+---
+
 ## [0.2.1] — 2026-04-09  *(Stage 2.5 — SPION loading sweep)*
 
 ### Added
