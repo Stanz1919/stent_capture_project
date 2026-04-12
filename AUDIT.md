@@ -181,3 +181,25 @@ No numerical drift. Results are reproducible.
 ---
 
 **Overall assessment.** The core code is trustworthy — physics is right, tests are comprehensive, results reproduce. The issues above are about labels, citations, and one orphan file, not about the simulation itself. The 14.2× trajectory-vs-static headline result stands. Fixing #1–#3 before the dissertation submission would remove the main peer-review exposure.
+
+---
+
+## Post-audit fixes implemented
+
+All 6 correctable issues have been addressed:
+
+| # | Issue | Fix | Commit |
+|---|---|---|---|
+| 1 | Orphaned `physics/shear_stress.py` | **Deleted** file; removes dead code entirely | `post-audit` |
+| 2 | Polyak 10 pg mislabel | Updated `physics/magnetic_force.py` docstring to clarify "lower loading; Polyak 2008 used 200 pg" | `post-audit` |
+| 3 | Aaslid 0.2 m/s attribution | Updated `physics/hydrodynamics.py` docstrings (2 locations) and README Vessel Geometry section to state "distal/diseased representative; healthy MCA ~0.62 m/s per Aaslid 1982" | `post-audit` |
+| 4 | Linear-χ SPION saturation | Added formal **Limitations** section to README documenting SPION saturation effect (~2× overestimate at B₀ = 0.5 T) and that comparative results are unaffected | `post-audit` |
+| 5 | 304 SS labeling | Updated README table: "M = 1 MA/m, Magnetisation (cold-worked/ferritic SS sat.)" | `post-audit` |
+| 6 | Re docstring (0.5 → 1.1) | Updated `simulation/trajectories.py` docstring: "Re ≈ 1.1 (blood, v = 0.2 m/s)" | `post-audit` |
+
+**Additional updates:**
+- **README.md**: Updated stage roadmap to remove Stage 4, mark Stages 1–3 + 3c (audit + paracrine) as complete. Added full Limitations section with saturation, geometry, and flow attribution.
+- **README.md**: Fixed SPION mass table entry (line 255): "10 pg (lower loading; Polyak 2008 used 200 pg)"
+- **Stage 4 note**: Since Stages 1–3 are now final (no Stage 4 planned), the Akoun-Yonnet serialisation concern (issue #7) is noted in audit but not actioned. Issue #8 (strut proximity) remains a known limitation per CHANGELOG.
+
+**Test suite remains at 74/74 passing** (70 original + 4 paracrine). All fixes are documentation / code cleanup; no physics changes.

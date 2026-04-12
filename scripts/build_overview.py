@@ -109,19 +109,17 @@ def _eqn(fig, y: float, latex: str, fs: float = 11) -> float:
 
 def page_title(pdf: PdfPages):
     fig = _new_page(pdf)
-    fig.text(0.5, 0.72, "stent_capture",
+    fig.text(0.5, 0.72, "Stent Capture Model",
              ha="center", fontsize=32, **SERIF_BF)
     fig.text(0.5, 0.66, "Magnetic capture of SPION-labelled cells\n"
              "on a cerebral ferromagnetic stent",
              ha="center", fontsize=15, **SERIF)
     fig.text(0.5, 0.56, "Project Overview",
              ha="center", fontsize=18, **SERIF)
-    fig.text(0.5, 0.48, "Stages 1 – 3 complete",
-             ha="center", fontsize=12, color="#555", **SERIF)
     fig.text(0.5, 0.30,
-             "A four-stage Python framework for high-resolution\n"
+             "A multi-stage Python framework for high-resolution\n"
              "trajectory-level exploration of magnetic cell targeting,\n"
-             "complementing the dissertation COMSOL finite-element model.",
+             "built to complement the COMSOL finite-element model.",
              ha="center", fontsize=11, color="#333", **SERIF)
     fig.text(0.5, 0.14, "v0.5.0 — 2026-04-11",
              ha="center", fontsize=10, color="#888", **SERIF)
@@ -168,32 +166,32 @@ def section_1(pdf: PdfPages):
     fig = _new_page(pdf)
     y = _heading(fig, TOP_Y, "1  Introduction", level=1)
     body = (
-        "This document walks the reader through the stent_capture project: "
+        "This document is a walkthrough and overview of the 'stent_capture_project': "
         "a Python simulation framework that models the magnetic capture of "
         "SPION-labelled endothelial cells on a ferromagnetic stent deployed "
-        "under cerebral flow conditions. It is intended as a standalone "
-        "companion to the dissertation, sufficient for a supervisor or "
-        "examiner to understand the physics, the code, and the numerical "
+        "under cerebral flow conditions. It is intended as a standalone"
+        "analaytical tool to aid the dissertation. This overview is designed to provide"
+        "understanding of the physics, code, and the numerical "
         "results without having to read the source tree.\n\n"
-        "What the project simulates. A ring of eight uniformly magnetised "
-        "rectangular struts sits inside a cylindrical cerebral artery "
+        "The code simulates a ring of eight uniformly magnetised "
+        "rectangular struts that sit inside a cerebral artery "
         "modelled with Poiseuille flow. A uniform external field B0 is "
-        "superposed on the stent's analytical magnetostatic field. SPION-"
+        "superposed on the stent's magnetostatic field. SPION-"
         "labelled cells are introduced upstream and their trajectories are "
         "integrated under a terminal-velocity ODE that balances Stokes drag "
         "against the magnetic dipole force. The framework evaluates both "
         "the static capture criterion |F_mag| > |F_drag| and the full "
         "trajectory integration, and compares them at MCA-representative "
         "flow and loading conditions.\n\n"
-        "Why the project exists. The dissertation proper uses a "
-        "finite-element COMSOL model to solve the full coupled magneto-"
-        "hydrodynamic problem. That model is expensive: each configuration "
-        "costs minutes to hours, making dense parametric sweeps infeasible. "
-        "The stent_capture framework is a supplementary tool built on fast "
-        "analytical expressions (Akoun & Yonnet 1984) so that (a) parameter "
+        "The analysis of magnetic capture uses a "
+        "finite-element COMSOL model to solve the full magnetic field gradient"
+        "around the stent. However, the model is expensive: each configuration "
+        "costs minutes to hours, making parametric sweeps infeasible. "
+        "The 'stent_capture_project' framework is a tool built on fast "
+        "analytical expressions (Akoun & Yonnet 1984) so that parameter "
         "sweeps across loadings, velocities, and stent geometries run in "
-        "seconds to minutes rather than hours; (b) trajectory ensembles of "
-        "hundreds of cells can be integrated without meshing; and (c) the "
+        "seconds to minutes rather than hours; trajectory mapping of "
+        "cells can be integrated without meshing; and the "
         "results serve as an independent numerical cross-check on the "
         "COMSOL simulations."
     )
@@ -204,9 +202,9 @@ def section_1(pdf: PdfPages):
     fig = _new_page(pdf)
     y = _heading(fig, TOP_Y, "1  Introduction (cont.)", level=1)
     body2 = (
-        "High-level architecture — the four stages. The project is "
-        "organised as four sequential stages, each building on the previous "
-        "one and each leaving behind its own tests and figures so that "
+        "The project is  organised into 3"
+        "stages, each building on the previous "
+        "one, leaving behind its own tests and figures so that "
         "regressions surface immediately.\n\n"
         "Stage 1 — Field model. Implements the Akoun & Yonnet (1984) closed-"
         "form expressions for the B-field of a uniformly magnetised "

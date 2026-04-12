@@ -7,7 +7,7 @@ flowing through a magnetised stent under an applied field.
 Physics
 -------
 For a 10 µm cell at physiological flow velocities, the particle Reynolds
-number Re = ρ v d / η ≈ 0.5 (blood, v = 0.2 m/s).  Inertia is negligible:
+number Re = ρ v d / η ≈ 1.1 (blood, v = 0.2 m/s).  Inertia is negligible:
 the cell instantly reaches terminal velocity where viscous (Stokes) drag
 balances the magnetic force.  The trajectory satisfies a first-order ODE:
 

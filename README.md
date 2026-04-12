@@ -1,6 +1,6 @@
 # stent_capture — Magnetic Stent Cell Capture Modelling
 
-Stages 1–3 complete.  Stage 4 (geometry optimisation) planned.
+Stages 1–3 complete. Final physics audit and paracrine module added (Stage 3c).
 
 - **Stage 1**: 3-D B-field and gradient magnitude using the Akoun & Yonnet
   (1984) analytical expressions; external uniform field superposition.
@@ -203,10 +203,10 @@ F_drag = 6 * pi * eta * R_cell * v_blood
 
 ### Vessel geometry and flow parameters
 
-The model represents an M1-segment cerebral artery (vessel diameter ~3 mm,
-mean velocity 0.2 m/s; Aaslid et al. 1982).  Parameters can be adjusted for
-smaller distal vessels (M2/M3, ~1.5–2 mm diameter, 0.1–0.15 m/s) where
-flow-diverter stents are commonly deployed.
+The model represents a cerebral vessel with mean velocity 0.2 m/s (representative
+of distal/diseased-vessel flow; healthy MCA mean per Aaslid et al. 1982 is ~0.62 m/s).
+Vessel diameter ~3 mm. Parameters can be adjusted for smaller distal vessels
+(M2/M3, ~1.5–2 mm diameter, 0.1–0.15 m/s) where flow-diverter stents are commonly deployed.
 
 The velocity range 0.05–0.5 m/s covers distal small vessels through MCA peak
 systolic flow.
@@ -220,7 +220,26 @@ A cell is captured at position r if:
 ```
 
 This is the conservative Furlani & Ng (2006) scalar criterion.  Directional
-analysis (Stage 3 trajectories) will extend the capture zone.
+analysis (Stage 3 trajectories) extends the capture zone.
+
+---
+
+## Known Limitations
+
+1. **SPION saturation** — The magnetic force model uses the linear-susceptibility
+   approximation (F ∝ |B|·∇|B|). Real SPIONs saturate at B ≳ 0.3 T. At B₀ = 0.5 T,
+   absolute force magnitudes may be overestimated by ~2×. However, the comparative
+   results (static vs. trajectory, efficiency trends) are unaffected because both
+   branches use the same force model.
+
+2. **Strut geometry approximation** — The Akoun & Yonnet kernel models struts
+   as uniformly magnetised rectangular prisms. Real struts have rounded edges and
+   may exhibit non-uniform magnetisation. The field-gradient approximation (ΔB/Δx
+   via FD) introduces ~5% error locally; integrated trajectory error is smaller.
+
+3. **Flow velocity attribution** — The default mean velocity 0.2 m/s is
+   representative of distal or diseased-vessel flow. Healthy MCA (Aaslid et al. 1982)
+   is ~0.62 m/s. Adjust `mean_velocity` for your vessel target.
 
 ---
 
@@ -232,7 +251,7 @@ analysis (Stage 3 trajectories) will extend the capture zone.
 | w         | 100 µm | Strut circumferential width    |
 | t         | 80 µm  | Strut radial thickness         |
 | L         | 500 µm | Strut axial length             |
-| M         | 1 MA/m | Magnetisation (~304 SS sat.)   |
+| M         | 1 MA/m | Magnetisation (cold-worked/ferritic SS sat.)   |
 | n_struts  | 8      | Number of struts               |
 | mag_mode  | radial | Magnetisation direction        |
 
@@ -244,17 +263,17 @@ analysis (Stage 3 trajectories) will extend the capture zone.
 |-------|--------------------------------------------------------------|--------------|
 | 1     | Package refactor + uniform external field + force parameter  | **Complete** |
 | 2     | Magnetic force (pN); Poiseuille drag; static capture maps    | **Complete** |
-| 3     | Cell trajectory ODE integration; capture efficiency          | Planned      |
-| 4     | Geometry optimisation (strut shape, n_struts, R)             | Planned      |
+| 3     | Cell trajectory ODE integration; capture efficiency          | **Complete** |
+| 3c    | Physics audit; VEGF paracrine signalling module              | **Complete** |
 
 ### Default cell / flow parameters (Stage 2)
 
 | Parameter            | Value          | Description                           |
 |----------------------|----------------|---------------------------------------|
 | Cell radius          | 10 µm          | Typical endothelial cell              |
-| SPION mass           | 10 pg          | Iron oxide per cell (Polyak 2008)     |
+| SPION mass           | 10 pg          | Iron oxide per cell (lower loading; Polyak 2008 used 200 pg)     |
 | chi_spion            | 2.0            | SPION material susceptibility         |
 | rho_spion            | 5170 kg/m³     | Magnetite density                     |
 | vessel_radius        | 1.54 mm        | Cerebral artery (MCA) / stent outer surface |
-| mean_velocity        | 0.2 m/s        | MCA mean flow (Aaslid et al. 1982)    |
+| mean_velocity        | 0.2 m/s        | Distal/diseased vessel (healthy MCA ~0.62 m/s per Aaslid et al. 1982)    |
 | blood_viscosity      | 4 mPa·s        | Whole blood                           |

@@ -65,7 +65,7 @@ class SPIONLabelledCell:
     of Polyak et al. 2008 / Chorny et al. 2007:
 
     - Cell radius 10 µm (typical EC in culture / vessel wall)
-    - SPION load 10 pg iron oxide per cell (Polyak reports 10-30 pg)
+    - SPION load 10 pg iron oxide per cell (lower loading; Polyak et al. 2008 stent study used 200 pg)
     - chi_spion = 2.0 (SI volume susceptibility of magnetite SPIONs in the
       field regime 0.1–1 T; appropriate for partially saturated nanoparticles
       with M ~ chi * B/mu_0 — see Furlani & Ng 2006 Table 1)

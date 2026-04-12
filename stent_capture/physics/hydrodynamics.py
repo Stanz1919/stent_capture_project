@@ -10,7 +10,8 @@ competing force to magnetic capture at the stent surface.
 Default parameters represent a cerebral arterial vessel (M1-segment MCA-
 representative):
 - Vessel radius 1.54 mm (matching stent outer surface; ~3 mm diameter)
-- Mean velocity 0.2 m/s (MCA mean ~0.2 m/s; Aaslid et al. 1982)
+- Mean velocity 0.2 m/s (representative of distal/diseased-vessel flow;
+  Aaslid et al. 1982 report healthy MCA mean ~0.62 m/s)
   Womersley number ~ 2, quasi-steady Poiseuille is a reasonable
   approximation for time-averaged analysis.
 - Blood viscosity 4 mPa·s (whole blood, hematocrit ~40%)
@@ -63,8 +64,8 @@ class BloodFlow:
     vessel_radius : float
         Vessel radius (m).  Default 1.54e-3 m (matches stent outer surface).
     mean_velocity : float
-        Cross-sectional mean velocity (m/s).  Default 0.2 m/s (MCA mean;
-        Aaslid et al. 1982).
+        Cross-sectional mean velocity (m/s).  Default 0.2 m/s (distal/diseased
+        vessel representative; healthy MCA mean is ~0.62 m/s per Aaslid et al. 1982).
     viscosity : float
         Dynamic viscosity of blood (Pa·s).  Default 4e-3 (whole blood).
     density : float
