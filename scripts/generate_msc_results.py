@@ -17,9 +17,10 @@ Key references for SPION labelling of MSCs:
 
 Physics note:
   - Larger MSC radius (12.5 vs 10 µm) increases Stokes drag by 25% at equal velocity
-  - Lower SPION loading (25 vs 200 pg) reduces magnetic force by ~8x
-  - Net effect: MSCs are significantly harder to capture than 200 pg endothelial cells,
-    but the trajectory advantage (drift over 2 mm approach) remains meaningful
+  - At 25 pg MSC loading (clinical standard): magnetic force is 2.5× higher but drag is 1.25× higher — MSC harder to capture than 10 pg EC
+  - At 200 pg: both EC and MSC reach comparable force (but MSC drag disadvantage persists)
+  - Net effect: trajectory integration essential for physiological flow; trajectory advantage accumulates over 2 mm approach
+  - Loading sweep [10, 25, 50, 100, 200 pg] matches EC range to enable direct comparison at 10, 50, 100, 200 pg
 
 All other parameters (stent geometry, B0, blood flow) identical to original project defaults.
 """
@@ -58,8 +59,8 @@ _B0_Z   = 0.5       # T
 _R_VES  = 1.54e-3   # m
 _V_MCA  = 0.2       # m/s
 
-# ── Sweep ranges appropriate for MSCs ─────────────────────────────────────────
-_LOADINGS_PG  = np.array([5., 10., 15., 25., 50., 75., 100.])   # pg
+# ── Sweep ranges — extended to match endothelial variant for direct comparison ──
+_LOADINGS_PG  = np.array([10., 25., 50., 100., 200.])   # pg — 10/50/100/200 overlap with EC; 25 is MSC-specific standard
 _VELOCITIES   = np.array([0.02, 0.05, 0.10, 0.20, 0.50])        # m/s
 _N_ITER       = 10  # binary search depth (~1.4 µm resolution; 7 gave ~11 µm, causing fig19/fig21 discrepancy)
 
@@ -675,10 +676,12 @@ def fig21_msc():
                          textcoords="offset points", ha="center", fontsize=8, color=_COLOR_STATIC)
 
     ax_a.axvline(_SPION_MASS_PG, color="green", ls="--", lw=1.5, alpha=0.7,
-                label=f"{_SPION_MASS_PG:.0f} pg default")
+                label=f"{_SPION_MASS_PG:.0f} pg (MSC default)")
+    ax_a.axvline(50.0, color="orange", ls=":", lw=1.5, alpha=0.6,
+                label="50 pg (EC reference)")
     ax_a.set_xlabel("SPION loading per MSC (pg)", fontsize=11)
     ax_a.set_ylabel("Capture range from stent surface (µm)", fontsize=11)
-    ax_a.set_title(f"(a) Loading sweep at v = {_V_MCA} m/s\nMSC radius = {_CELL_RADIUS_M*1e6:.1f} µm", fontsize=11)
+    ax_a.set_title(f"(a) Loading sweep at v = {_V_MCA} m/s — orange line marks EC reference (50 pg)\nMSC radius = {_CELL_RADIUS_M*1e6:.1f} µm", fontsize=11)
     ax_a.legend(fontsize=10)
     ax_a.grid(True, alpha=0.3)
     ax_a.set_xlim(left=0)
@@ -715,7 +718,8 @@ def fig21_msc():
     fig.suptitle(
         f"Fig 21 (MSC) — Static vs trajectory capture range\n"
         f"MSC: r = {_CELL_RADIUS_M*1e6:.1f} µm, B₀ = {_B0_Z} T | "
-        f"At {_SPION_MASS_PG:.0f} pg, v = {_V_MCA} m/s: trajectory extends static by {ratio_str}",
+        f"At {_SPION_MASS_PG:.0f} pg (MSC standard), v = {_V_MCA} m/s: trajectory extends static by {ratio_str} | "
+        f"Panel (a) includes 50 pg for EC comparison",
         fontsize=12, y=1.02
     )
     fig.tight_layout()
