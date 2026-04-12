@@ -1,0 +1,336 @@
+[33mcommit 25022c49e9b219d9004d09e95a2b707434748caa[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mMSCand200pg[m[33m, [m[1;31morigin/MSCand200pg[m[33m)[m
+Author: sam Lukaitis <samlukaitis5@gmail.com>
+Date:   Sun Apr 12 19:40:51 2026 +0100
+
+    MSC model, 200pg retained
+
+[33mcommit 050e1601f8ce392c750ecad8c8e66e3f2def631d[m[33m ([m[1;31morigin/200pgResults[m[33m, [m[1;32mmain[m[33m, [m[1;32m200pgResults[m[33m)[m
+Author: sam Lukaitis <samlukaitis5@gmail.com>
+Date:   Sun Apr 12 17:09:10 2026 +0100
+
+    Update: added 200pg results, consistent with Polak usage. Kept original results file as a comparison, introduced a comparison markdown file - still needs some refining. Future updates require introduction of MSCs instead of endothelial cells
+
+[33mcommit b8110d01d4cae6d1bc19a3faea82b35fb66f820e[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: Stanz1919 <samlukaitis5@gmail.com>
+Date:   Sun Apr 12 15:35:26 2026 +0100
+
+    Fig21: wrap title to 3 lines to prevent distortion
+    
+    Split suptitle across 3 lines:
+    - Line 1: title and method description
+    - Line 2: headline results at MCA conditions
+    - Line 3: physical interpretation
+    
+    Improves readability without stretching figure horizontally.
+    
+    Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+
+[33mcommit 858447e2bcc33a258bc033eaa94c62aa616595ca[m
+Author: Stanz1919 <samlukaitis5@gmail.com>
+Date:   Sun Apr 12 15:19:12 2026 +0100
+
+    Audit post-fixes: correct citations, delete dead code, add limitations
+    
+    Post-audit implementation of recommended fixes:
+    
+    1. Delete stent_capture/physics/shear_stress.py (orphaned, broken loops)
+    2. Polyak loading: update magnetic_force.py docstring to clarify "lower
+       loading; Polyak 2008 used 200 pg" (not default 10 pg)
+    3. Aaslid attribution: update hydrodynamics.py (2 places) and README to
+       state "distal/diseased representative; healthy MCA ~0.62 m/s"
+    4. SPION saturation: add formal Limitations section to README documenting
+       ~2× overestimate at B0=0.5T and that comparative results unaffected
+    5. 304 SS label: update README table to "cold-worked/ferritic SS sat."
+    6. Reynolds number: update trajectories.py docstring Re ~0.5 -> ~1.1
+    
+    Also:
+    - AUDIT.md: add "Post-audit fixes" section documenting all changes
+    - README.md: remove Stage 4, mark 1-3c complete, add Limitations section
+    - Overview.pdf: regenerated with corrected documentation
+    - Test suite: 74/74 still passing
+    
+    Physics unchanged; all fixes are documentation/clarity.
+    
+    Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+
+[33mcommit 4288f5cf1a9b16055ea5f3163817112a7d0624c6[m
+Author: Stanz1919 <samlukaitis5@gmail.com>
+Date:   Sun Apr 12 14:19:30 2026 +0100
+
+    Paracrine module: VEGF signalling analysis, figs 22-24
+    
+    Add stent_capture/paracrine/ with three modules:
+    - transport.py: 2D reaction-diffusion FD solver (ParacrineField)
+    - secretion.py: VEGFSource mapping captured-cell positions to source field
+    - therapeutic.py: threshold analysis and time-to-threshold helpers
+    
+    All parameters validated against literature:
+    - D = 1.04e-11 m^2/s (Mac Gabhann & Popel 2006, PLoS Comp Bio)
+    - k_deg = 1.93e-4 s^-1, t_1/2 = 60 min (Stefanini et al. 2008, PLoS ONE)
+    - q_cell = 0.068 molecules/cell/s (Stefanini et al. 2008)
+    - C_therapeutic = 5-25 ng/mL (Ozawa et al. 2004, J Clin Invest)
+    
+    Key finding: basal EC secretion insufficient for therapeutic VEGF with
+    ~320 captured cells (C_max = 0.27 ng/mL). VEGF-enhanced cells (100x,
+    modelling transfected ECs) reach therapeutic levels (C_max = 26.8 ng/mL)
+    with therapeutic zone visible in fig23. Time to threshold at 200 um = 19 min.
+    
+    Figures: fig22 (2D heatmap), fig23 (C vs distance), fig24 (time to threshold).
+    Tests: 4 new tests (74 total passing).
+    
+    Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+
+[33mcommit 81b08f4d1543abbf7f945af363204bd91845b891[m
+Author: Stanz1919 <samlukaitis5@gmail.com>
+Date:   Sat Apr 11 15:25:52 2026 +0100
+
+    Documentation: Overview.pdf added
+    
+    25-page standalone walkthrough of the stent capture project — introduction,
+    physical model (Akoun-Yonnet + Furlani-Ng + Poiseuille + terminal-velocity
+    ODE), implementation overview, results summaries for figs 12/13/17/18/20/21,
+    limitations, how-to-use, and references. Built via matplotlib PdfPages in
+    scripts/build_overview.py.
+    
+    Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+
+[33mcommit bc40c153f312076093c31dda539aab13b429148f[m
+Author: Stanz1919 <samlukaitis5@gmail.com>
+Date:   Sat Apr 11 15:06:29 2026 +0100
+
+    Final audit: AUDIT.md added
+    
+    Comprehensive physics and code review covering every module in core/,
+    physics/, simulation/, and figures/ (43 files). Test baseline 70/70 and
+    fig21 headline (14.2x at 50 pg / 0.2 m/s) reproduce bit-identically.
+    
+    Key findings documented:
+    - shear_stress.py is orphaned dead code with broken loops; recommend
+      deletion.
+    - "Polyak 2008 default = 10 pg" label is wrong throughout figs 17/20/21
+      and magnetic_force.py docstring; Polyak's actual dose was 0.2 ng =
+      200 pg.
+    - "MCA mean 0.2 m/s (Aaslid 1982)" attribution is wrong; Aaslid's 1982
+      value is 0.62 m/s. 0.2 m/s is defensible as distal/diseased but
+      should be re-cited.
+    - Linear-chi SPION force approximation over-estimates F by ~2x at
+      B0 >= 0.3 T once particles saturate; note as a dissertation
+      limitation.
+    - Minor: trajectories.py Re docstring says 0.5, actual ~1.06.
+    
+    Core physics (Akoun-Yonnet kernel, Furlani-Ng force, terminal-velocity
+    ODE) is correctly implemented and internally consistent.
+
+[33mcommit ec066b812ecb1b0f12e49a973886a3dfa4d01f39[m
+Author: Stanz1919 <samlukaitis5@gmail.com>
+Date:   Fri Apr 10 20:16:42 2026 +0100
+
+    Add wall shear stress analysis module with WallShearStress, ShearStressProfile, and CellAttachmentMechanics classes
+
+[33mcommit 792b67ae8819e2ba1353600d890c572bd1d508a8[m
+Author: Stent Project <stent@project.local>
+Date:   Thu Apr 9 20:17:51 2026 +0100
+
+    Stage 3c: fig21 static vs trajectory headline comparison
+    
+    fig21: two-panel static-vs-trajectory comparison. At MCA conditions
+    (50 pg, v=0.2 m/s, B0=0.5T), trajectory predicts 97 um effective capture
+    range vs static 6.8 um (14.2x larger). Binary search over strut-aligned
+    injection radius, 7 iterations, 140s runtime. Includes velocity sweep
+    (50 pg, 0.02-0.50 m/s) and loading sweep (10-200 pg, MCA velocity).
+    Update fig19 caption, README headline results, CHANGELOG v0.5.0.
+    
+    Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+
+[33mcommit f936e0360ad677be6638f6931d93300bedd85073[m
+Author: Stent Project <stent@project.local>
+Date:   Thu Apr 9 14:35:54 2026 +0100
+
+    Stage 3b fig20 + unit fix: efficiency vs velocity and loading curves
+    
+    fig20: two-panel log-x curves, injection r=1.20-1.45mm, 20 cells each.
+    Velocity sweep 0.01-0.50 m/s: 100% -> 40%. Loading sweep 5-300pg: 25% -> 85%.
+    Fix loadings_pg unit bug (1e12 -> 1e15) and update CHANGELOG to v0.4.0.
+    
+    Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+
+[33mcommit fee71bc8b100d69108ce6e644ada0a6053f3eb88[m
+Author: Stent Project <stent@project.local>
+Date:   Thu Apr 9 14:35:45 2026 +0100
+
+    Stage 3b fig19: trajectory bundle — 3 velocity panels, 3D Poly3DCollection
+    
+    Three 3D panels (v=0.02/0.10/0.50 m/s), 20 cells each, 200 pg SPION, B0=0.5T.
+    Injection line r=0.10–1.45mm; captured blue, escaped red.
+    
+    Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+
+[33mcommit 6fe94615d7e6de52f3875b0be6653025914568b8[m
+Author: Stent Project <stent@project.local>
+Date:   Thu Apr 9 14:16:39 2026 +0100
+
+    Stage 3b: capture_efficiency module and 5 tests (70 passing)
+    
+    Adds sweep_injection_line(), capture_efficiency_vs_velocity(), and
+    capture_efficiency_vs_loading() with optional multiprocessing.Pool
+    parallelisation.  Five tests covering zero-field escape, summary integrity,
+    non-zero capture, and velocity/loading monotonicity.
+    
+    Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+
+[33mcommit 75c09be111c89ee03208da41be50fcea6bcbe62f[m
+Author: Stent Project <stent@project.local>
+Date:   Thu Apr 9 02:10:35 2026 +0100
+
+    Stage 3a: single-cell trajectory integration with scipy solve_ivp, fig18 added
+    
+    Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+
+[33mcommit 36cb842e330a55f64777ebcd74d90813cd053181[m
+Author: Stent Project <stent@project.local>
+Date:   Thu Apr 9 01:36:02 2026 +0100
+
+    Relabel flow parameters from coronary to cerebral arterial (MCA-representative)
+    
+    Update docstrings, figure captions, and README. Add Aaslid et al. 1982
+    citation for MCA mean velocity ~0.2 m/s and vessel geometry methodology note.
+    No code logic changes.
+    
+    Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+
+[33mcommit a1e9e6d932d2d2ce8b9468752a997b6f8540ad58[m
+Author: Stent Project <stent@project.local>
+Date:   Thu Apr 9 01:32:47 2026 +0100
+
+    Stage 2.5: SPION loading parameter sweep, fig17 added
+    
+    Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+
+[33mcommit 63c9be2d8ab30cd36ea2b9a09576281e6c73313b[m
+Author: Stent Project <stent@project.local>
+Date:   Thu Apr 9 00:45:04 2026 +0100
+
+    Add Stage 2: magnetic force, Poiseuille drag, and static capture maps
+    
+    New physics modules (physics/):
+    - magnetic_force.py: SPIONLabelledCell + magnetic_force() using
+      F = (V_spion * chi / mu_0) * |B| * nabla|B| (Furlani & Ng 2006)
+    - hydrodynamics.py: BloodFlow (Poiseuille) + stokes_drag() (Stokes formula)
+    - capture_criterion.py: capture_map() + capture_distance() using scalar
+      |F_mag| > |F_drag| criterion
+    
+    New figures (figures/):
+    - fig14: |F_mag| vs distance (axial/transverse B0), polar strut map, SPION sweep
+    - fig15: Stokes drag vs distance/velocity, Poiseuille profile, shear stress
+    - fig16: 2D capture map heatmap for 3 blood velocities (0.05, 0.2, 0.5 m/s)
+    
+    New tests: 36 tests across 3 new files; 57 total, all passing.
+    
+    Core: compute_gradient_vector added to gradient.py (used by magnetic_force).
+    README + CHANGELOG updated to Stage 2.
+    
+    Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+
+[33mcommit c02a8219de8572fafb2ff6554b55ddafd1e6fc32[m
+Author: Stent Project <stent@project.local>
+Date:   Wed Apr 8 23:51:13 2026 +0100
+
+    Stage 1 fix: clarify gradient vs force parameter physics, add fig13 force visualisation
+    
+    - Diagnostic confirmed no catastrophic cancellation in FD gradient: ratio
+      max/min = 1.000 across dx = 1e-8 to 5e-6 m with B0 = 0.5 T axial.
+      The reduced |nabla|B_total|| under axial B0 is correct physics (B_total
+      rotated towards z suppresses projection of dB_stent/dx onto B_total).
+    
+    - Add TestFDStability (2 tests, 19 total) asserting gradient stability ratio
+      < 1.002 across 3 decades of dx, with and without B0.
+    
+    - gradient.py: add design-note explaining why analytical gradient was ruled
+      out (FD is adequate; analytical derivation too complex for zero benefit).
+    
+    - external_field.py TotalField docstring: explain that |nabla|B_total||
+      alone is NOT the capture metric; document force parameter FP = |B|*grad|B|
+      and the Stage 2 path to physical force in Newtons.
+    
+    - fig12: add physics annotation box explaining why gradient reduction is
+      correct; panel (d) title directs reader to fig13 for the force parameter.
+    
+    - fig13 (new): 4-panel force parameter figure showing FP = |B_total|*|nabla|B_total||
+      vs distance for B0 = 0, 0.1, 0.5, 1.0 T (axial and transverse), FP at 200 um
+      vs B0 sweep, and enhancement ratio FP(B0)/FP(0) vs distance.
+    
+    Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+
+[33mcommit d5c084566a545fc2eb7d59770d3a2a03ebe1b32e[m
+Author: Stent Project <stent@project.local>
+Date:   Wed Apr 8 22:46:59 2026 +0100
+
+    Add README.md and CHANGELOG.md for Stage 1 release
+    
+    README: package layout, quick-start commands, physics summary,
+    default parameters, stage roadmap.
+    CHANGELOG: full accounting of what Stage 1 added, changed, and fixed
+    (including the Akoun-Yonnet sign correction and 2-D model removal).
+    
+    Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+
+[33mcommit 88e061c042a4931636c86b0fb7854602943a59e2[m
+Author: Stent Project <stent@project.local>
+Date:   Wed Apr 8 22:45:39 2026 +0100
+
+    Fix Akoun-Yonnet kernel sign, add tests and fig12 (Stage 1 complete)
+    
+    Sign fix: _akoun_yonnet_local accumulated a global sign inversion relative to
+    the H = -grad(phi_m) convention.  Far-field verification: B_x along the dipole
+    axis now converges to +mu0*m/(2*pi*r^3) > 0 as expected.  All figure outputs
+    (|B| and |grad|B||) are unaffected since they use magnitudes; B_total = B_stent
+    + B0 vector superposition is now physically correct.
+    
+    Tests (17 passing):
+    - Regression: TotalField(ring, None) identical to StentRing.grad_B to rtol=1e-6
+    - Superposition: single-strut |B_total|=|B_stent|+B0 when B0 || M, rtol=1e-10
+    - Rotation invariance: 45-deg symmetry of 8-strut ring, rtol=1e-3
+    - Far-field: |B_total| -> |B0| and |grad B| -> 0 at r=50mm
+    - UniformExternalField: broadcast shape, magnitude, input validation
+    
+    Fig 12: 2x2 panel showing B0=0, B0=0.5T axial, B0=0.5T transverse profiles
+    plus capture distance vs B0 magnitude (0-1 T, axial direction).
+    
+    Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+
+[33mcommit 5bf129e8f1a9b0de7d67d40cbcfc85c2afa847a3[m
+Author: Stent Project <stent@project.local>
+Date:   Wed Apr 8 22:31:53 2026 +0100
+
+    Add figures 01-11 using 3-D Akoun & Yonnet model throughout
+    
+    All figures use StentRing (3-D) exclusively; 2-D surface-charge code removed.
+    Cross-section figures (01-08) evaluate at z=0 for the midplane slice.
+    Fig 10 repurposed as a 3-D convergence check (strut length L sweep)
+    showing the model approaches the infinite-cylinder limit at large L.
+    Shared styling in figures/style.py; shared defaults in figures/common.py.
+    Each module is independently runnable via python -m stent_capture.figures.figXX.
+    
+    Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+
+[33mcommit fdc01e1b3bb8f8a7b040f5c55e8407fecd004862[m
+Author: Stent Project <stent@project.local>
+Date:   Wed Apr 8 22:26:10 2026 +0100
+
+    Add .gitignore (pyc, results, pytest cache)
+    
+    Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+
+[33mcommit c35523fd6bd70b49e551cb2058b3f1e43acaefb0[m
+Author: Stent Project <stent@project.local>
+Date:   Wed Apr 8 22:25:48 2026 +0100
+
+    Add package skeleton, 3-D field model, and external field physics (Stage 1)
+    
+    - stent_capture/ package with core/, physics/, figures/, tests/ sub-packages
+    - core/field_model.py: StentRing (Akoun & Yonnet 3-D analytical, assume_saturation flag)
+    - core/gradient.py: compute_gradient_magnitude (field-model-agnostic finite differences)
+    - physics/external_field.py: UniformExternalField + TotalField composer
+    - legacy_stent_analysis.py copied from original script for reference
+    
+    Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
