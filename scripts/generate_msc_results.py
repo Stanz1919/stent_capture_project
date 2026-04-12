@@ -61,7 +61,7 @@ _V_MCA  = 0.2       # m/s
 # ── Sweep ranges appropriate for MSCs ─────────────────────────────────────────
 _LOADINGS_PG  = np.array([5., 10., 15., 25., 50., 75., 100.])   # pg
 _VELOCITIES   = np.array([0.02, 0.05, 0.10, 0.20, 0.50])        # m/s
-_N_ITER       = 7   # binary search depth (~11 µm resolution)
+_N_ITER       = 10  # binary search depth (~1.4 µm resolution; 7 gave ~11 µm, causing fig19/fig21 discrepancy)
 
 # ── Trajectory integration settings ──────────────────────────────────────────
 _TRAJ_KW = dict(z_end=2e-3, max_time=1.5, rtol=1e-5, atol=1e-8)
@@ -149,8 +149,8 @@ def fig13_msc():
     ax.set_xlabel("Radial distance (mm)", fontsize=11)
     ax.set_ylabel("Axial distance (mm)", fontsize=11)
     ax.set_title(
-        f"Fig 13 (MSC) — Force parameter = |B| · |∇|B||\n"
-        f"B₀ = {_B0_Z} T (axial), strut-aligned axis (θ=0)", fontsize=12
+        f"Fig 13 (MSC) — Force parameter = |B| · |∇|B|| (cell-type-independent)\n"
+        f"B₀ = {_B0_Z} T (axial), strut-aligned axis (θ=0) — identical to original fig13", fontsize=12
     )
 
     fig.savefig(OUT_DIR / "fig13_force_parameter_msc.png", dpi=150, bbox_inches="tight")
@@ -174,17 +174,21 @@ def fig14_msc():
     r_vals = np.linspace(1.46e-3, 1.65e-3, 100)
     pts = np.column_stack([r_vals, np.zeros_like(r_vals), np.zeros_like(r_vals)])
 
-    cell_msc    = _make_msc_cell()
-    cell_ref_10 = SPIONLabelledCell(spion_mass_per_cell=10e-15)   # endothelial default
+    cell_msc     = _make_msc_cell()
+    cell_ref_10  = SPIONLabelledCell(spion_mass_per_cell=10e-15)    # endothelial lower regime
+    cell_ref_200 = SPIONLabelledCell(spion_mass_per_cell=200e-15)   # Polyak 2008 working dose
 
-    F_msc    = np.linalg.norm(magnetic_force(cell_msc,    tf, pts), axis=1) * 1e12
-    F_ref_10 = np.linalg.norm(magnetic_force(cell_ref_10, tf, pts), axis=1) * 1e12
+    F_msc     = np.linalg.norm(magnetic_force(cell_msc,     tf, pts), axis=1) * 1e12
+    F_ref_10  = np.linalg.norm(magnetic_force(cell_ref_10,  tf, pts), axis=1) * 1e12
+    F_ref_200 = np.linalg.norm(magnetic_force(cell_ref_200, tf, pts), axis=1) * 1e12
 
     fig, ax = plt.subplots(figsize=(10, 6))
-    ax.semilogy(r_vals * 1e3, F_msc,    'o-', color=_COLOR_MSC,    lw=2.5, ms=5,
+    ax.semilogy(r_vals * 1e3, F_msc,     'o-',  color=_COLOR_MSC,   lw=2.5, ms=5,
                 label=f"MSC ({_SPION_MASS_PG:.0f} pg, r={_CELL_RADIUS_M*1e6:.1f} µm)")
-    ax.semilogy(r_vals * 1e3, F_ref_10, 's--', color="gray", lw=1.5, ms=4, alpha=0.7,
-                label="Endothelial (10 pg, r=10 µm)")
+    ax.semilogy(r_vals * 1e3, F_ref_10,  's--', color="gray",       lw=1.5, ms=4, alpha=0.7,
+                label="Endothelial (10 pg, r=10 µm) — lower regime")
+    ax.semilogy(r_vals * 1e3, F_ref_200, '^--', color="steelblue",  lw=1.5, ms=4, alpha=0.7,
+                label="Endothelial (200 pg, r=10 µm) — Polyak 2008")
 
     ax.set_xlabel("Radial distance from axis (mm)", fontsize=11)
     ax.set_ylabel("Magnetic force (pN)", fontsize=11)
@@ -564,6 +568,11 @@ def fig20_msc():
     ax_a.loglog(_LOADINGS_PG, np.maximum(d_static_load, 0.01), 'o-', color=_COLOR_MSC,
                lw=2.5, ms=7, markerfacecolor="white", markeredgewidth=1.8,
                label="MSC (r = 12.5 µm)")
+    for m, d in zip(_LOADINGS_PG, d_static_load):
+        if d <= 0:
+            ax_a.annotate("0 µm\n(no static\ncapture)", xy=(m, 0.01),
+                         xytext=(0, 6), textcoords="offset points",
+                         ha="center", fontsize=7, color="red")
     ax_a.axvline(_SPION_MASS_PG, color="green", ls="--", alpha=0.8, lw=1.5,
                 label=f"{_SPION_MASS_PG:.0f} pg default")
     ax_a.set_xlabel("SPION loading (pg)", fontsize=11)
@@ -582,6 +591,11 @@ def fig20_msc():
     ax_b.loglog(_VELOCITIES, np.maximum(d_static_vel, 0.01), 's-', color="#9b59b6",
                lw=2.5, ms=7, markerfacecolor="white", markeredgewidth=1.8,
                label=f"MSC {_SPION_MASS_PG:.0f} pg")
+    for v, d in zip(_VELOCITIES, d_static_vel):
+        if d <= 0:
+            ax_b.annotate("0 µm", xy=(v, 0.01), xytext=(0, 6),
+                         textcoords="offset points",
+                         ha="center", fontsize=7, color="red")
     ax_b.axvline(_V_MCA, color="blue", ls="--", alpha=0.7, lw=1.5, label="0.2 m/s (MCA)")
     ax_b.set_xlabel("Mean velocity (m/s)", fontsize=11)
     ax_b.set_ylabel("Static capture distance (µm)", fontsize=11)
@@ -696,7 +710,7 @@ def fig21_msc():
     # Reference line at MCA, default loading
     ref_static = static_b[_VELOCITIES.tolist().index(0.2)] if 0.2 in _VELOCITIES else None
     ref_traj   = traj_b[  _VELOCITIES.tolist().index(0.2)] if 0.2 in _VELOCITIES else None
-    ratio_str  = f"{ref_traj/ref_static:.1f}×" if ref_static and ref_static > 0 else "N/A"
+    ratio_str  = f"{ref_traj/ref_static:.1f}×" if ref_static and ref_static > 0 else "∞ (static = 0)"
 
     fig.suptitle(
         f"Fig 21 (MSC) — Static vs trajectory capture range\n"
