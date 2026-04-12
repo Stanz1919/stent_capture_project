@@ -253,16 +253,13 @@ def make_figure():
     # Suptitle
     # -----------------------------------------------------------------------
     fig.suptitle(
-        "Fig 21 \u2014 Static vs trajectory capture predictions.  "
-        "Solid blue: Furlani & Ng (2006) static criterion (|F$_{mag}$| > |F$_{drag}$|).  "
-        "Dashed red: trajectory effective capture range "
-        "(strut-aligned cell, 7-step binary search over injection radius).  "
-        f"At MCA conditions ({_M_REF_PG:.0f} pg, $\\bar{{v}}$ = {_V_MCA:.1f} m/s, "
-        f"B$_0$ = {_B0_Z} T): "
-        f"trajectory = {val_traj_ref:.0f} \u03bcm vs static = {val_static_ref:.0f} \u03bcm "
-        f"({ratio_str} larger).  "
-        "Radial drift accumulated over the 2 mm upstream approach extends the "
-        "effective capture zone well beyond the instantaneous force-balance threshold.",
+        "Fig 21 \u2014 Static vs trajectory capture predictions\n"
+        "Solid blue: Furlani & Ng (2006) static criterion  |  "
+        "Dashed red: trajectory effective range (binary search over injection radius)\n"
+        f"At MCA conditions ({_M_REF_PG:.0f} pg, {_V_MCA:.1f} m/s, {_B0_Z} T):  "
+        f"trajectory = {val_traj_ref:.0f} \u03bcm  vs  static = {val_static_ref:.0f} \u03bcm  "
+        f"({ratio_str} larger)\n"
+        "Radial drift over 2 mm approach extends capture zone beyond instantaneous force balance",
         fontsize=8.5, y=0.995,
     )
 
