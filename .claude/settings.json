@@ -16,7 +16,11 @@
       "Bash(python -m pytest stent_capture/tests/test_magnetic_force.py -v)",
       "Bash(python -c \"import stent_capture.physics.magnetic_force as mf; cell = mf.SPIONLabelledCell\\(\\); print\\(cell\\)\")",
       "Bash(python -m stent_capture.figures.fig_saturation_impact)",
-      "Bash(git commit -m 'Implement SPION Langevin saturation model:*)"
+      "Bash(git commit -m 'Implement SPION Langevin saturation model:*)",
+      "Bash(git push:*)",
+      "Bash(ls -lh output/fig_saturation_impact.*)",
+      "Bash(python -c \"from stent_capture.figures.common import OUT; print\\(OUT\\)\")",
+      "Bash(ls -lh results/fig_saturation_impact.*)"
     ]
   }
 }
