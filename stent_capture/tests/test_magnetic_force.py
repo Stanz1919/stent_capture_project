@@ -118,11 +118,13 @@ class TestForceDirection:
 class TestChiScaling:
     @pytest.mark.parametrize("chi_ratio", [0.5, 2.0, 4.0])
     def test_force_scales_linearly_with_chi(self, chi_ratio):
+        """Test linear chi scaling in constant-susceptibility (non-saturating) mode."""
         ring = _make_ring()
         tf = TotalField(ring, UniformExternalField([0.0, 0.0, 0.5]))
 
-        cell_ref = SPIONLabelledCell(spion_susceptibility=1.0)
-        cell_scaled = SPIONLabelledCell(spion_susceptibility=1.0 * chi_ratio)
+        # Use spion_sat_magnetization=None to enforce constant-chi mode (linear scaling)
+        cell_ref = SPIONLabelledCell(spion_susceptibility=1.0, spion_sat_magnetization=None)
+        cell_scaled = SPIONLabelledCell(spion_susceptibility=1.0 * chi_ratio, spion_sat_magnetization=None)
 
         pt = np.array([[_DEFAULT_STENT["R"] + _DEFAULT_STENT["t"] / 2 + 200e-6,
                         0.0, 0.0]])
@@ -135,6 +137,90 @@ class TestChiScaling:
             np.linalg.norm(F_ref) * chi_ratio,
             rtol=1e-10,
             err_msg=f"Force should scale linearly with chi (ratio {chi_ratio})",
+        )
+
+
+# ===========================================================================
+# Test 3b: Langevin saturation model reduces chi at high fields
+# ===========================================================================
+
+class TestLangevinSaturation:
+    """
+    Test the Langevin saturation model for SPION susceptibility.
+
+    At low fields (B→0), chi_eff should match chi_0.
+    At high fields (B >> M_sat/chi_0), chi_eff should be much less than chi_0.
+    This is the physically realistic model for magnetite SPIONs.
+    """
+
+    def test_chi_eff_at_zero_field(self):
+        """At B→0, chi_eff should equal chi_0."""
+        ring = _make_ring()
+        # Uniform field so gradient is zero, but we can still check chi_eff behavior
+        tf = TotalField(ring, UniformExternalField([0.0, 0.0, 0.001]))  # 1 mT only
+
+        chi_0 = 2.0
+        cell = SPIONLabelledCell(spion_susceptibility=chi_0,
+                                spion_sat_magnetization=446e3)
+
+        pt = np.array([[_DEFAULT_STENT["R"] + _DEFAULT_STENT["t"] / 2 + 100e-6,
+                        0.0, 0.0]])
+
+        # Force should be ~zero (uniform field), but chi_eff should be ≈ chi_0
+        from stent_capture.physics.magnetic_force import _chi_effective
+        B_mag = 0.001
+        chi_eff = _chi_effective(chi_0, 446e3, np.array([B_mag]))[0]
+        assert abs(chi_eff - chi_0) / chi_0 < 0.01, (
+            f"chi_eff at B=1mT should be ~chi_0 (within 1%), "
+            f"got {chi_eff:.4f} (chi_0={chi_0})"
+        )
+
+    def test_chi_eff_at_high_field_is_reduced(self):
+        """At B=1.5T, chi_eff should be significantly less than chi_0."""
+        chi_0 = 2.0
+        M_sat = 446e3
+        from stent_capture.physics.magnetic_force import _chi_effective
+
+        # At B=1.5 T (external MRI field), expect chi_eff ≈ 0.35 (analytical check)
+        chi_eff = _chi_effective(chi_0, M_sat, np.array([1.5]))[0]
+        assert chi_eff < chi_0, (
+            f"chi_eff should be less than chi_0 at 1.5T, "
+            f"got chi_eff={chi_eff:.4f}, chi_0={chi_0}"
+        )
+        # Check specific value (should be ~0.35, allow ±10%)
+        expected = 0.35
+        assert abs(chi_eff - expected) / expected < 0.10, (
+            f"chi_eff at 1.5T should be ~{expected:.2f}, got {chi_eff:.4f}"
+        )
+
+    def test_chi_eff_monotonically_decreasing(self):
+        """chi_eff should decrease monotonically with increasing B."""
+        chi_0 = 2.0
+        M_sat = 446e3
+        from stent_capture.physics.magnetic_force import _chi_effective
+
+        B_array = np.array([0.0, 0.5, 1.0, 1.5, 2.0, 3.0])
+        chi_eff_array = _chi_effective(chi_0, M_sat, B_array)
+
+        # Check monotonic decrease
+        for i in range(len(chi_eff_array) - 1):
+            assert chi_eff_array[i] > chi_eff_array[i+1], (
+                f"chi_eff should decrease with B: {chi_eff_array}"
+            )
+
+    def test_constant_chi_mode_unaffected(self):
+        """With spion_sat_magnetization=None, chi should remain constant."""
+        chi_0 = 2.0
+        from stent_capture.physics.magnetic_force import _chi_effective
+
+        B_array = np.array([0.0, 0.5, 1.0, 1.5, 2.0, 3.0])
+        chi_eff_array = _chi_effective(chi_0, None, B_array)
+
+        # Should be constant at chi_0
+        np.testing.assert_allclose(
+            chi_eff_array, chi_0,
+            rtol=1e-12,
+            err_msg="With M_sat=None, chi_eff should equal chi_0 everywhere"
         )
 
 
