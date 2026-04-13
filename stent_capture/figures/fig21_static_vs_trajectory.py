@@ -40,7 +40,7 @@ from stent_capture.simulation.trajectories import integrate_trajectory
 # Parameters
 # ---------------------------------------------------------------------------
 
-_B0_Z     = 0.5
+_B0_Z     = 1.5   # T — MRI-strength, matches COMSOL
 _R_VES    = 1.54e-3
 _V_MCA    = 0.2        # m/s  -- MCA mean (Aaslid 1982)
 _M_REF_PG = 50.0       # pg   -- reference loading for panel (b)

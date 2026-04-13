@@ -23,7 +23,7 @@ OUT_DIR = proj_root / "results-200pg"
 # Parameters - same as original
 _V_CASES = [0.05, 0.2, 0.5]   # m/s
 _R_VES   = 1.54e-3             # m
-_B0_Z    = 0.5                 # T
+_B0_Z    = 1.5                 # T — MRI-strength, matches COMSOL
 _CELL    = SPIONLabelledCell(spion_mass_per_cell=200e-15)  # 200 PG - THE KEY CHANGE
 _GRID_N  = 55                  # grid points per axis
 

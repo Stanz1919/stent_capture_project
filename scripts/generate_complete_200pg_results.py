@@ -27,7 +27,7 @@ OUT_DIR = proj_root / "results-200pg"
 OUT_DIR.mkdir(exist_ok=True)
 
 # Parameters for 200 pg variant
-_B0_Z = 0.5
+_B0_Z = 1.5   # T — MRI-strength, matches COMSOL
 _R_VES = 1.54e-3
 _V_MCA = 0.2
 _SPION_MASS_PG = 200.0  # The key change

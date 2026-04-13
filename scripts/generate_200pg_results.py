@@ -26,7 +26,7 @@ OUT_DIR = proj_root / "results-200pg"
 OUT_DIR.mkdir(exist_ok=True)
 
 # Parameters (same as defaults except SPION mass)
-_B0_Z = 0.5
+_B0_Z = 1.5   # T — MRI-strength, matches COMSOL
 _R_VES = 1.54e-3
 _V_MCA = 0.2
 _M_REF_PG = 200.0  # CHANGED: was 50 pg, now 200 pg

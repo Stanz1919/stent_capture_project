@@ -47,7 +47,7 @@ from stent_capture.simulation.capture_efficiency import sweep_injection_line
 # Parameters
 # ---------------------------------------------------------------------------
 
-_B0_Z      = 0.5
+_B0_Z      = 1.5   # T — MRI-strength, matches COMSOL
 _R_VES     = 1.54e-3
 _N_CELLS   = 20
 _VELOCITIES = [0.02, 0.10, 0.50]   # m/s
@@ -199,7 +199,7 @@ def make_figure():
                fontsize=9, bbox_to_anchor=(0.5, 0.01))
 
     fig.suptitle(
-        "Fig 19 — Trajectory bundles: 200 pg SPION-labelled cells, B0 = 0.5 T axial\n"
+        "Fig 19 — Trajectory bundles: 200 pg SPION-labelled cells, B0 = 1.5 T axial (MRI)\n"
         "20 cells injected along a wide radial line (r = 0.1–1.45 mm, z = \u22122 mm) "
         "for visualisation of trajectory shapes across the full lumen.  "
         "Most cells start far from the magnetically active near-wall region — see Fig 20 "

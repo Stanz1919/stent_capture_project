@@ -137,12 +137,12 @@ def make_figure():
     d_profile = np.linspace(5e-6, 1.5e-3, 200)
     d_um = d_profile * 1e6
 
-    G_noB0  = _radial_profile(np.zeros(3),         d_profile)   # panel (a)
-    G_axial = _radial_profile(np.array([0,0,0.5]),  d_profile)   # panel (b)
-    G_trans = _radial_profile(np.array([0.5,0,0]),  d_profile)   # panel (c)
+    G_noB0  = _radial_profile(np.zeros(3),          d_profile)   # panel (a)
+    G_axial = _radial_profile(np.array([0, 0, 1.5]), d_profile)  # panel (b) — 1.5 T MRI
+    G_trans = _radial_profile(np.array([1.5, 0, 0]), d_profile)  # panel (c) — 1.5 T MRI
 
-    # Capture distance vs B0 magnitude — panel (d)
-    B0_range = np.linspace(0.0, 1.0, 21)
+    # Capture distance vs B0 magnitude — panel (d), extended to MRI strength
+    B0_range = np.linspace(0.0, 1.5, 31)
     cap_dist_data: dict[str, np.ndarray] = {}
 
     for lbl, thr in THRESHOLDS.items():
@@ -189,8 +189,8 @@ def make_figure():
             )
 
     _profile_ax(ax_a, G_noB0,  "B0 = 0 (stent field only)", "a")
-    _profile_ax(ax_b, G_axial, "B0 = 0.5 T axial (+z)", "b", add_note=True)
-    _profile_ax(ax_c, G_trans, "B0 = 0.5 T transverse (+x, parallel to M)", "c")
+    _profile_ax(ax_b, G_axial, "B0 = 1.5 T axial (+z, MRI)", "b", add_note=True)
+    _profile_ax(ax_c, G_trans, "B0 = 1.5 T transverse (+x, parallel to M)", "c")
 
     # Panel (d): capture distance vs B0 — note in subtitle that grad metric
     # underestimates capture benefit; refer reader to fig13
@@ -201,15 +201,16 @@ def make_figure():
     )
     for (lbl, dists), c in zip(cap_dist_data.items(), TH_COLORS):
         ax_d.plot(B0_range, dists, "o-", color=c, lw=2, ms=5, label=lbl)
+    ax_d.axvline(1.5, color="#8e44ad", ls="--", lw=1.5, alpha=0.8, label="1.5 T (MRI / COMSOL)")
     ax_d.set_xlabel("B0 magnitude (T)")
     ax_d.set_ylabel("Capture distance (µm)")
     ax_d.legend(fontsize=9)
-    ax_d.set_xlim(0, 1.0)
+    ax_d.set_xlim(0, 1.5)
     ax_d.grid(True, alpha=0.3)
 
     fig.suptitle(
         "Effect of Uniform External Field on Gradient Magnitude |∇|B_total||\n"
-        "(8 struts, R = 1.5 mm, M = 1.0 MA/m, assume_saturation = True,\n"
+        "(12 struts / V2-2C, R = 1.5 mm, M = 1.0 MA/m, assume_saturation = True,\n"
         "through-strut radial profile at z = 0 — for force parameter see fig13)",
         fontsize=12, y=1.01,
     )

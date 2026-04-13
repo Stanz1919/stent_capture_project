@@ -19,7 +19,7 @@ The field and gradient are computed once and shared across all three
 velocity panels (only drag changes with velocity).
 
 Default parameters:
-- Stent: R=1.5mm, 8 struts, w=100µm, t=80µm, M=1MA/m, assume_saturation=True
+- Stent: R=1.5mm, 12 struts (V2-2C), w=100µm, t=80µm, M=1MA/m, assume_saturation=True
 - B0: 0.5 T axial (+z)
 - Cell: 10 µm, 10 pg, chi=2.0
 - Vessel: R_vessel=1.54mm, viscosity=4mPa·s
@@ -47,7 +47,7 @@ from stent_capture.physics.hydrodynamics import BloodFlow, stokes_drag
 
 _V_CASES = [0.05, 0.2, 0.5]   # m/s
 _R_VES   = 1.54e-3             # m
-_B0_Z    = 0.5                 # T
+_B0_Z    = 1.5                 # T — MRI-strength, matches COMSOL
 _CELL    = SPIONLabelledCell()
 _GRID_N  = 55                  # grid points per axis (55x55 = 3025 pts)
 
@@ -199,7 +199,7 @@ def make_figure():
 
     max_ratio_str = f"{max_ratio_overall:.2f}" if max_ratio_overall > 0 else "~0.52"
     fig.suptitle(
-        "Force ratio |F_mag|/|F_drag|,  B0 = 0.5 T axial,  10 pg SPION-loaded cell\n"
+        "Force ratio |F_mag|/|F_drag|,  B0 = 1.5 T axial (MRI-strength),  10 pg SPION-loaded cell\n"
         f"Green = |F_mag| > |F_drag| (capture),  Red = drag dominates,  "
         f"Max ratio ≈ {max_ratio_str} (near stent inner surface, v_mean = 0.05 m/s)\n"
         "Force ratio |F_mag|/|F_drag| under static force balance. Ratios below unity (red)\n"

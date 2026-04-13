@@ -48,7 +48,7 @@ from stent_capture.physics.external_field import TotalField, UniformExternalFiel
 # Helpers
 # ---------------------------------------------------------------------------
 
-_B0_CASES = [0.0, 0.1, 0.5, 1.0]   # T
+_B0_CASES = [0.0, 0.1, 0.5, 1.0, 1.5]   # T — 1.5 T = MRI strength (COMSOL reference)
 
 
 def _force_parameter_profile(
@@ -91,9 +91,9 @@ def _force_parameter_profile(
 # Colour palette: one colour per B0 magnitude, shared across panels
 # ---------------------------------------------------------------------------
 
-_COLORS = ["#333333", "#2980b9", "#e67e22", "#c0392b"]   # 0, 0.1, 0.5, 1.0 T
-_LINESTYLES_AX    = ["-",  "-",  "-",  "-"]
-_LINESTYLES_TRANS = ["--", "--", "--", "--"]
+_COLORS = ["#333333", "#2980b9", "#e67e22", "#c0392b", "#8e44ad"]  # 0, 0.1, 0.5, 1.0, 1.5 T
+_LINESTYLES_AX    = ["-",  "-",  "-",  "-",  "-"]
+_LINESTYLES_TRANS = ["--", "--", "--", "--", "--"]
 
 
 # ---------------------------------------------------------------------------
@@ -119,7 +119,7 @@ def make_figure():
     # -----------------------------------------------------------------------
     # Panel (c): FP at 200 µm vs B0 magnitude (finer sweep)
     # -----------------------------------------------------------------------
-    B0_range = np.linspace(0.0, 1.0, 41)
+    B0_range = np.linspace(0.0, 1.5, 46)   # extended to MRI strength
     idx_200 = np.argmin(np.abs(d_profile - 200e-6))
 
     fp_vs_B0_axial  = np.array([
@@ -171,10 +171,11 @@ def make_figure():
     ax_c.plot(B0_range, fp_vs_B0_trans,  "r--", lw=2, label="Transverse (+x)")
     ax_c.axhline(fp_axial[0.0][idx_200], color="k", ls=":", lw=1.2,
                  alpha=0.6, label="B0 = 0 baseline")
+    ax_c.axvline(1.5, color="#8e44ad", ls="--", lw=1.2, alpha=0.7, label="1.5 T (MRI / COMSOL)")
     ax_c.set_xlabel("B0 magnitude (T)")
     ax_c.set_ylabel("|B_total| · |∇|B_total|| (T²/m)")
     ax_c.set_title("(c) Force parameter at 200 µm vs B0 magnitude")
-    ax_c.set_xlim(0, 1.0)
+    ax_c.set_xlim(0, 1.5)
     ax_c.legend(fontsize=9)
     ax_c.grid(True, alpha=0.3)
 
@@ -205,7 +206,7 @@ def make_figure():
 
     fig.suptitle(
         "Force Parameter FP = |B_total| · |∇|B_total||  (proportional to SPION capture force)\n"
-        "(8 struts, R = 1.5 mm, M = 1.0 MA/m, assume_saturation = True,\n"
+        "(12 struts / V2-2C, R = 1.5 mm, M = 1.0 MA/m, assume_saturation = True,\n"
         "through-strut radial profile at z = 0)\n"
         "Stage 2 will convert FP to physical force F = (V_p·χ_eff/μ₀) · FP",
         fontsize=11, y=1.02,

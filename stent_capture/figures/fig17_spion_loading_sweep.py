@@ -5,7 +5,7 @@ Fig 17 — SPION loading parameter sweep.
 
 (a) Capture distance (µm, from stent inner surface into lumen) vs SPION
     loading (1–300 pg), for mean blood velocities 0.05, 0.2, 0.5 m/s.
-    B0 = 0.5 T axial.  Capture distance is defined as the outermost
+    B0 = 1.5 T axial (MRI).  Capture distance is defined as the outermost
     distance from the stent inner surface at which |F_mag| ≥ |F_drag|,
     swept along the through-strut radial line into the lumen.
 
@@ -43,7 +43,7 @@ from stent_capture.core.gradient import compute_gradient_vector
 # Parameters
 # ---------------------------------------------------------------------------
 
-_B0_Z    = 0.5               # T, axial
+_B0_Z    = 1.5               # T, axial — MRI-strength, matches COMSOL
 _R_VES   = 1.54e-3           # m, vessel radius
 _V_CASES = [0.05, 0.2, 0.5]  # m/s
 _COLORS  = ["#2980b9", "#e67e22", "#c0392b"]
@@ -228,7 +228,7 @@ def make_figure():
     ax_a.set_ylabel("Capture distance from stent inner surface (µm)")
     ax_a.set_title(
         "(a) Capture distance vs SPION loading\n"
-        "(B0 = 0.5 T axial, inward radial sweep)"
+        "(B0 = 1.5 T axial (MRI), inward radial sweep)"
     )
     ax_a.set_xlim(1, 300)
     ax_a.set_ylim(0, 1550)
@@ -251,7 +251,7 @@ def make_figure():
     ax_b.set_ylabel("|F_mag| / |F_drag|  (at 5 µm from stent inner surface)")
     ax_b.set_title(
         "(b) Force ratio at 5 µm from stent inner surface\n"
-        "(B0 = 0.5 T axial; ratio > 1 = capture)"
+        "(B0 = 1.5 T axial (MRI); ratio > 1 = capture)"
     )
     ax_b.set_xlim(1, 300)
     ax_b.set_ylim(1e-3, 1e2)
@@ -259,7 +259,7 @@ def make_figure():
     ax_b.grid(True, which="both", alpha=0.3)
 
     fig.suptitle(
-        "SPION loading parameter sweep  —  B0 = 0.5 T axial, 8-strut stent, R = 1.5 mm\n"
+        "SPION loading parameter sweep  —  B0 = 1.5 T axial (MRI), 12-strut stent (V2-2C), R = 1.5 mm\n"
         "Static Furlani & Ng criterion: |F_mag| > |F_drag|  (Stage 3 will extend to trajectories)\n"
         "Cell: 10 µm radius, χ = 2.0, magnetite (5170 kg/m³);  vessel R = 1.54 mm, η = 4 mPa·s\n"
         "Cerebral arterial / MCA-representative flow (Aaslid et al. 1982)",

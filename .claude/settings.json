@@ -1,7 +1,12 @@
 {
   "permissions": {
     "allow": [
-      "Bash(git -c user.name=Stanz1919 -c user.email=samlukaitis5@gmail.com commit -m ':*)"
+      "Bash(git -c user.name=Stanz1919 -c user.email=samlukaitis5@gmail.com commit -m ':*)",
+      "Bash(python -)",
+      "Bash(python -m stent_capture.figures.fig03_gradient_vs_distance)",
+      "Bash(python -m stent_capture.figures.fig06_n_struts)",
+      "Bash(python -m stent_capture.figures.fig14_force_vs_distance)",
+      "Bash(python -c ':*)"
     ]
   }
 }

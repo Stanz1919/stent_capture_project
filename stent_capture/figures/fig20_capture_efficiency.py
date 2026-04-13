@@ -46,7 +46,7 @@ from stent_capture.simulation.capture_efficiency import (
 # Parameters
 # ---------------------------------------------------------------------------
 
-_B0_Z    = 0.5
+_B0_Z    = 1.5   # T — MRI-strength, matches COMSOL
 _R_VES   = 1.54e-3
 _N_CELLS = 20
 
@@ -153,7 +153,7 @@ def make_figure():
     ax_v.legend(fontsize=7, loc='upper right')
     ax_v.grid(True, which='both', alpha=0.25)
     ax_v.set_title('(a) Efficiency vs mean blood velocity\n'
-                   '(200 pg SPION loading, B0 = 0.5 T)', fontsize=10)
+                   '(200 pg SPION loading, B0 = 1.5 T (MRI))', fontsize=10)
 
     # -----------------------------------------------------------------------
     # (b) Efficiency vs loading
@@ -187,7 +187,7 @@ def make_figure():
     ax_l.legend(fontsize=7, loc='upper left')
     ax_l.grid(True, which='both', alpha=0.25)
     ax_l.set_title('(b) Efficiency vs SPION loading\n'
-                   '($\\bar{v}$ = 0.05 m/s, B0 = 0.5 T)', fontsize=10)
+                   '($\\bar{v}$ = 0.05 m/s, B0 = 1.5 T (MRI))', fontsize=10)
 
     # -----------------------------------------------------------------------
     # Shared suptitle

@@ -52,7 +52,7 @@ from stent_capture.simulation.trajectories import integrate_trajectory
 # Parameters
 # ---------------------------------------------------------------------------
 
-_B0_Z     = 0.5
+_B0_Z     = 1.5   # T — MRI-strength, matches COMSOL
 _R_VES    = 1.54e-3
 _V_MEAN   = 0.05
 _R_INJECT = np.array([1.3e-3, 0.0, -2e-3])
@@ -320,7 +320,7 @@ def make_figure():
                  if traj_p.capture_time is not None else "—")
 
     fig.suptitle(
-        "Single-cell trajectory comparison — B0 = 0.5 T axial, v_mean = 0.05 m/s "
+        "Single-cell trajectory comparison — B0 = 1.5 T axial (MRI), v_mean = 0.05 m/s "
         "(MCA-representative), injection at (1.3 mm, 0, −2 mm)\n"
         "Two cells, identical conditions, differing only in SPION loading.  "
         f"200 pg cell (blue): captured at {cap_str} after {t_cap_str}.  "

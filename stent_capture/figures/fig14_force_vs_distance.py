@@ -31,8 +31,8 @@ from stent_capture.physics.magnetic_force import SPIONLabelledCell, magnetic_for
 # Constants
 # ---------------------------------------------------------------------------
 
-_B0_CASES = [0.0, 0.1, 0.5, 1.0]   # T
-_COLORS   = ["#333333", "#2980b9", "#e67e22", "#c0392b"]
+_B0_CASES = [0.0, 0.1, 0.5, 1.0, 1.5]   # T — 1.5 T = MRI strength (COMSOL reference)
+_COLORS   = ["#333333", "#2980b9", "#e67e22", "#c0392b", "#8e44ad"]
 _CELL     = SPIONLabelledCell()       # default: 10 µm, 10 pg, chi=2.0
 
 
@@ -76,9 +76,9 @@ def make_figure():
         r_obs * np.sin(phi),
         np.zeros(n_phi),
     ])
-    tf_B05 = _make_tf(B0_z=0.5)
+    tf_B15 = _make_tf(B0_z=1.5)   # 1.5 T = MRI strength (COMSOL reference)
     tf_noB = _make_tf()
-    F_polar_B05 = np.linalg.norm(magnetic_force(_CELL, tf_B05, obs_polar), axis=1) * 1e12
+    F_polar_B15 = np.linalg.norm(magnetic_force(_CELL, tf_B15, obs_polar), axis=1) * 1e12
     F_polar_no  = np.linalg.norm(magnetic_force(_CELL, tf_noB, obs_polar), axis=1) * 1e12
 
     # Panel (d): force at 200 µm vs SPION mass
@@ -86,7 +86,7 @@ def make_figure():
     pt_200 = np.array([[R + t / 2 + d_200, 0.0, 0.0]])
     mass_pg = np.logspace(0, 2, 40)   # 1–100 pg
     fp_mass: dict[float, np.ndarray] = {}
-    for B0 in [0.0, 0.5, 1.0]:
+    for B0 in [0.0, 0.5, 1.0, 1.5]:
         tf = _make_tf(B0_z=B0)
         forces = []
         for m_pg in mass_pg:
@@ -118,15 +118,15 @@ def make_figure():
     # Panel (c): polar plot in a Cartesian axes (polar projection)
     ax_c_cart.remove()
     ax_c = fig.add_subplot(2, 2, 3, projection="polar")
-    ax_c.plot(phi, F_polar_B05, color=_COLORS[2], lw=2, label="B0 = 0.5 T axial")
+    ax_c.plot(phi, F_polar_B15, color=_COLORS[4], lw=2, label="B0 = 1.5 T axial (MRI)")
     ax_c.plot(phi, F_polar_no,  color=_COLORS[0], lw=1.5, ls="--",
               label="B0 = 0 (reference)")
-    # Mark strut positions (8 struts, θ = k * 45°)
-    strut_angles = np.linspace(0, 2 * np.pi, 8, endpoint=False)
-    r_max_polar = max(F_polar_B05.max(), F_polar_no.max()) * 1.15
+    # Mark strut positions dynamically from DEFAULTS["n_struts"]
+    strut_angles = np.linspace(0, 2 * np.pi, DEFAULTS["n_struts"], endpoint=False)
+    r_max_polar = max(F_polar_B15.max(), F_polar_no.max()) * 1.15
     for sa in strut_angles:
         ax_c.axvline(sa, color="#aaaaaa", lw=0.8, alpha=0.5)
-    ax_c.set_title("(c) |F_mag| vs angle at r_outer + 200 µm\n(B0 = 0.5 T axial)",
+    ax_c.set_title("(c) |F_mag| vs angle at r_outer + 200 µm\n(B0 = 1.5 T axial, MRI)",
                    pad=15, fontsize=10)
     ax_c.set_theta_zero_location("E")
     ax_c.set_theta_direction(1)
@@ -136,9 +136,10 @@ def make_figure():
     ax_c.set_xticklabels([f"{int(np.degrees(a))}°" for a in strut_angles], fontsize=7)
 
     # Panel (d): force vs SPION mass
-    mass_colors = [_COLORS[0], _COLORS[2], _COLORS[3]]
-    for (B0, col) in zip([0.0, 0.5, 1.0], mass_colors):
-        ax_d.loglog(mass_pg, fp_mass[B0], color=col, lw=2, label=f"B0 = {B0:.1f} T")
+    mass_colors = [_COLORS[0], _COLORS[2], _COLORS[3], _COLORS[4]]
+    for (B0, col) in zip([0.0, 0.5, 1.0, 1.5], mass_colors):
+        lbl = f"B0 = {B0:.1f} T" + (" (MRI)" if B0 == 1.5 else "")
+        ax_d.loglog(mass_pg, fp_mass[B0], color=col, lw=2, label=lbl)
     ax_d.axvline(10, color="#666666", ls=":", lw=1.2, label="Default (10 pg)")
     ax_d.set_xlabel("SPION load (pg iron oxide per cell)")
     ax_d.set_ylabel("|F_mag| at 200 µm (pN)")
@@ -149,7 +150,7 @@ def make_figure():
     fig.suptitle(
         "Magnetic force on SPION-labelled cell near magnetised stent\n"
         "(cell: 10 µm, 10 pg iron oxide, chi = 2.0; "
-        "stent: 8 struts, R = 1.5 mm, M = 1.0 MA/m, assume_saturation = True)",
+        "stent: 12 struts / V2-2C, R = 1.5 mm, M = 1.0 MA/m, assume_saturation = True)",
         fontsize=11, y=1.01,
     )
     plt.tight_layout()
