@@ -77,7 +77,7 @@ def _build_grid():
 
 
 def _compute_F_mag(pts: np.ndarray) -> np.ndarray:
-    ring = make_ring()
+    ring = make_ring(B0_magnitude=_B0_Z)  # Adaptive M for COMSOL calibration at 1.5 T
     ring.assume_saturation = True
     tf = TotalField(ring, UniformExternalField([0.0, 0.0, _B0_Z]))
     F = magnetic_force(_CELL, tf, pts)

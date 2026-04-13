@@ -37,7 +37,9 @@ _CELL     = SPIONLabelledCell()       # default: 10 µm, 10 pg, chi=2.0
 
 
 def _make_tf(B0_z: float = 0.0, B0_x: float = 0.0) -> TotalField:
-    ring = make_ring()
+    # Adaptive M: at B0 = 1.5 T use COMSOL-calibrated M = 2.20 MA/m
+    B0_magnitude = B0_z if B0_z > 0 else (B0_x if B0_x > 0 else 0.0)
+    ring = make_ring(B0_magnitude=B0_magnitude)
     ring.assume_saturation = True
     vec = np.array([B0_x, 0.0, B0_z])
     ext = UniformExternalField(vec) if np.any(vec != 0) else None

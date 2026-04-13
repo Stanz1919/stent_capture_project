@@ -76,7 +76,9 @@ def _radial_profile(
     t = DEFAULTS["t"]
     r_outer = R + t / 2
 
-    ring = make_ring()
+    # Adaptive M: at B0 = 1.5 T use COMSOL-calibrated M
+    B0_magnitude = np.linalg.norm(B0_vec)
+    ring = make_ring(B0_magnitude=B0_magnitude)
     ring.assume_saturation = True
 
     ext = UniformExternalField(B0_vec) if np.any(B0_vec != 0) else None

@@ -106,7 +106,7 @@ def _strut_faces_mm(ring) -> list:
 # ---------------------------------------------------------------------------
 
 def _run_trajectories():
-    ring = make_ring()
+    ring = make_ring(B0_magnitude=_B0_Z)  # Adaptive M for COMSOL calibration at 1.5 T
     ring.assume_saturation = True
     tf   = TotalField(ring, UniformExternalField([0.0, 0.0, _B0_Z]))
     flow = BloodFlow(vessel_radius=_R_VES, mean_velocity=_V_MEAN)

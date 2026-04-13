@@ -85,7 +85,7 @@ def _precompute():
     pts = np.column_stack([x_vals, np.zeros(N_pts), np.zeros(N_pts)])
 
     print("    Precomputing B-field and gradient along radial line...")
-    ring = make_ring()
+    ring = make_ring(B0_magnitude=_B0_Z)  # Adaptive M for COMSOL calibration at 1.5 T
     ring.assume_saturation = True
     tf = TotalField(ring, UniformExternalField([0.0, 0.0, _B0_Z]))
 

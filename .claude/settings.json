@@ -6,7 +6,12 @@
       "Bash(python -m stent_capture.figures.fig03_gradient_vs_distance)",
       "Bash(python -m stent_capture.figures.fig06_n_struts)",
       "Bash(python -m stent_capture.figures.fig14_force_vs_distance)",
-      "Bash(python -c ':*)"
+      "Bash(python -c ':*)",
+      "Bash(python)",
+      "Bash(python -m stent_capture.figures.fig16_capture_map)",
+      "Bash(cat)",
+      "Read(//tmp/**)",
+      "Bash(python -m stent_capture.figures.fig04_comsol_gradient_validation)"
     ]
   }
 }

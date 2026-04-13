@@ -98,7 +98,7 @@ def _strut_faces_mm(ring) -> list:
 # ---------------------------------------------------------------------------
 
 def make_figure():
-    ring = make_ring()
+    ring = make_ring(B0_magnitude=_B0_Z)  # Adaptive M for COMSOL calibration at 1.5 T
     ring.assume_saturation = True
     tf   = TotalField(ring, UniformExternalField([0.0, 0.0, _B0_Z]))
     cell = SPIONLabelledCell(spion_mass_per_cell=200e-15)
