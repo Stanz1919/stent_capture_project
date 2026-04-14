@@ -66,33 +66,33 @@ Parameter: ξ = α*B/μ₀ where α = 3*χ_0/M_sat
 ### Test 1: Static Capture Distance (B₀=1.5T, v=0.2 m/s)
 
 | Loading (pg) | Langevin (µm) | Constant (µm) | Ratio |
-|---|---|---|---|
-| 10 | 0.0 | 0.0 | — |
-| 30 | 0.0 | 0.0 | — |
-| 50 | 0.0 | 6.8 | >> |
-| 100 | 18.5 | 24.4 | 1.32x |
-| 200 | 36.1 | 39.0 | 1.08x |
+|--------------|---------------|---------------|-------|
+|      10      |      0.0      |      0.0      |   —   |
+|      30      |      0.0      |      0.0      |   —   |
+|      50      |      0.0      |      6.8      |   >>  |
+|     100      |     18.5      |     24.4      | 1.32x |
+|     200      |     36.1      |     39.0      | 1.08x |
 
 **Average: 1.20x reduction**
 
 ### Test 2: Trajectory Efficiency (injection line r=1.20-1.45mm)
 
-| Case | Langevin | Constant | Ratio |
-|---|---|---|---|
-| 50 pg, v=0.05 | 0.500 | 0.650 | 1.30x |
-| 50 pg, v=0.20 | 0.350 | 0.400 | 1.14x |
-| 200 pg, v=0.05 | 0.750 | 0.950 | 1.27x |
+|      Case       | Langevin | Constant | Ratio |
+|-----------------|----------|----------|-------|
+|  50 pg, v=0.05  |   0.500  |   0.650  | 1.30x |
+|  50 pg, v=0.20  |   0.350  |   0.400  | 1.14x |
+| 200 pg, v=0.05  |   0.750  |   0.950  | 1.27x |  
 
 **Average: 1.24x reduction**
 
 ### Test 3: Force Field Magnitude (strut-aligned axis)
 
 | Distance (µm) | F_Langevin (pN) | F_Const (pN) | Ratio |
-|---|---|---|---|
-| 50 | 6720 | 8309 | 1.24x |
-| 100 | 1358 | 2337 | 1.72x |
-| 150 | 702 | 1702 | 2.42x |
-| 200 | 512 | 1312 | 2.56x |
+|---------------|-----------------|--------------|-------|
+|       50      |      6720       |      8309    | 1.24x |
+|      100      |      1358       |      2337    | 1.72x |
+|      150      |       702       |      1702    | 2.42x |
+|      200      |       512       |      1312    | 2.56x |
 
 **Trend:** Force reduction increases with distance (as expected - saturation more significant in weaker far-field)
 
