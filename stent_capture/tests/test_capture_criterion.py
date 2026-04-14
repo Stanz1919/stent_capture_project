@@ -287,9 +287,13 @@ class TestLoadingSweep:
     def test_capture_distance_positive_at_100pg(self):
         """
         At 100 pg SPION loading with v_mean=0.05 m/s and B0=0.5T, there should
-        be meaningful capture (> 50 µm from stent inner surface). This confirms
+        be meaningful capture (> 30 µm from stent inner surface). This confirms
         that static capture is physically predicted in the upper experimental
         loading regime and that the code is not accidentally returning zero.
+
+        Threshold lowered from 50 µm → 30 µm when Langevin saturation became
+        the default (commit 53f7ff9): at B ≈ 0.5 T the Langevin factor
+        3L(ξ)/ξ ≈ 0.70 attenuates χ_eff and shortens the capture zone.
         """
         ring = _make_ring()
         tf = TotalField(ring, UniformExternalField([0.0, 0.0, 0.5]))
@@ -297,7 +301,7 @@ class TestLoadingSweep:
         flow = _default_flow(mean_velocity=0.05)
 
         d = capture_distance(cell, tf, flow, direction="inward")
-        assert d > 50e-6, (
-            f"Expected capture distance > 50 µm at 100 pg, v=0.05 m/s, B0=0.5T; "
+        assert d > 30e-6, (
+            f"Expected capture distance > 30 µm at 100 pg, v=0.05 m/s, B0=0.5T; "
             f"got {d*1e6:.1f} µm. Check SPION parameters and field model."
         )
