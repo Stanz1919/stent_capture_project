@@ -204,8 +204,8 @@ class TestSuperpositionParallel:
 
 class TestRotationInvariance:
     """
-    An 8-strut ring has discrete 45° (= 2π/8) rotational symmetry.
-    Rotating observation points AND B0 by 45° must give the same |∇|B_total||.
+    A multi-strut ring has discrete rotational symmetry (2π/n_struts).
+    Rotating observation points AND B0 by this angle must give the same |∇|B_total||.
     """
 
     @pytest.mark.parametrize("B0_vec", [
@@ -217,7 +217,7 @@ class TestRotationInvariance:
         ring = _make_ring()
         B0 = np.asarray(B0_vec, dtype=float)
 
-        angle = 2 * np.pi / 8   # symmetry rotation of an 8-strut ring
+        angle = 2 * np.pi / _DEFAULT["n_struts"]   # symmetry rotation based on actual n_struts
 
         # 3-D rotation about z-axis by `angle`
         cos_a, sin_a = np.cos(angle), np.sin(angle)
