@@ -99,7 +99,7 @@ class SPIONLabelledCell:
     def __init__(
         self,
         radius: float = 10e-6,
-        spion_mass_per_cell: float = 10e-15,   # kg — 10 pg of iron oxide
+        spion_mass_per_cell: float = 50e-15,   # kg — 50 pg of iron oxide (Polyak benchmark)
         spion_susceptibility: float = 2.0,
         spion_density: float = 5170,
         spion_sat_magnetization: float | None = 446e3,  # A/m for Langevin model

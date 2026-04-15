@@ -23,23 +23,24 @@ VEGF paracrine reaction–diffusion extension for therapeutic-window analysis.
 ## Headline results
 
 At cerebral-flow conditions (v̄ = 0.2 m/s, B₀ = 0.5 T axial, 50 pg SPION
-loading per cell, constant-χ formulation, n_struts = 8):
+loading per cell, Langevin saturation model, 12-strut geometry):
 
 - **Trajectory analysis predicts an effective capture range of ~97 µm**
-  from the stent inner surface. The static Furlani & Ng force-balance
-  criterion predicts only 6.8 µm under the same conditions — a
-  **~14× underestimate** — demonstrating that trajectory integration is
-  essential for quantitative prediction.
-
-- **Near-wall capture efficiency** (injection band r = 1.20–1.45 mm,
-  20 cells): ~75 % at 200 pg loading and v̄ = 0.05 m/s; ~50 % at MCA
-  mean velocity (0.2 m/s) and 200 pg loading. Monotonically falling
-  with velocity, monotonically rising with loading.
+  from the stent inner surface (50 pg loading). The static Furlani & Ng
+  force-balance criterion predicts **zero capture** under the same
+  conditions, demonstrating that trajectory integration is
+  **essential for quantitative prediction** — static-only analysis would miss
+  all capture at physiological flow rates.
 
 - **Capture range vs loading** (v̄ = 0.2 m/s, B₀ = 0.5 T): from ~51 µm
-  at 10 pg to ~143 µm at 200 pg. The trajectory-to-static ratio grows
-  from 3.7× (200 pg) to ∞ (10 pg, where static predicts zero capture
-  but trajectory integration confirms finite range).
+  at 10 pg to ~131 µm at 200 pg. Static capture remains negligible
+  (< 37 µm) across the entire loading range, while trajectory predictions
+  increase monotonically with loading.
+
+- **Near-wall capture efficiency** (injection band r = 1.20–1.45 mm,
+  20 cells): ~45 % at v̄ = 0.2 m/s and 50 pg loading (the updated
+  headline dose); ~50 % at higher 200 pg loading. Monotonically falling
+  with velocity, monotonically rising with loading.
 
 - **Higher flow velocities increase the extension factor**: at
   v̄ = 0.5 m/s the static criterion predicts 0 µm yet trajectory
@@ -107,11 +108,12 @@ stent_capture_project/
     │   ├── common.py            # DEFAULTS, COMSOL calibration, make_ring()
     │   ├── fig01 .. fig11       # Stage 1: field, gradient, geometry sweeps
     │   ├── fig12                # Stage 1: external-field comparison
-    │   ├── fig04_comsol…        # Stage 3d: COMSOL validation bar chart
     │   ├── fig13 .. fig16       # Stage 2: force, drag, capture maps
     │   ├── fig17 .. fig21       # Stage 3: trajectories, efficiency, headline
     │   ├── fig22 .. fig24       # Stage 3c: VEGF paracrine
-    │   └── fig_saturation_impact# Stage 3d: Langevin vs constant-χ
+    │   ├── fig25_comsol_gradient_validation # Stage 3d: 3-panel COMSOL validation
+    │   ├── fig26_comsol_multigeometry       # Stage 3d: 4-panel multi-geometry analysis
+    │   └── fig_saturation_impact            # Stage 3d: Langevin vs constant-χ comparison
     └── tests/
         ├── test_external_field.py     # 19 tests
         ├── test_magnetic_force.py     # 19 tests (inc. Langevin saturation)
@@ -141,16 +143,15 @@ pytest  (for tests)
 python -m pytest stent_capture/tests/ -v
 ```
 
-At time of writing: **77 / 78 passing** on Python 3.14 / numpy 2.4 /
-scipy 1.17. See `AUDIT.md` Issue #1 for the single remaining failure
-(a stale test threshold after the Langevin default change).
+Expected: **78 / 78 passing** on Python 3.14 / numpy 2.4 / scipy 1.17.
+All tests include Langevin saturation model validation and COMSOL cross-checks.
 
 ### Regenerate all figures
 
 From the project root:
 
 ```bash
-# All 24 Stage 1–3c figures with current defaults
+# All 26 figures (Stage 1–3c + COMSOL validation) with thesis defaults
 python -m scripts.regenerate_original_results
 
 # 200 pg SPION variant (Polyak working dose)
@@ -164,15 +165,16 @@ python -m scripts.check_comsol_calibration
 python -m scripts.compare_saturation_models
 ```
 
-Output goes to `results/` (main) and `results-200pg/`, `results-polyak/`
-respectively.
+Output goes to `results/` (main figures 1–26), `results-200pg/` (variant),
+and `results-polyak/` (comparison) respectively.
 
 ### Run a single figure
 
 ```bash
 python -m stent_capture.figures.fig21_static_vs_trajectory
 python -m stent_capture.figures.fig22_concentration_field
-python -m stent_capture.figures.fig04_comsol_gradient_validation
+python -m stent_capture.figures.fig25_comsol_gradient_validation
+python -m stent_capture.figures.fig26_comsol_multigeometry
 python -m stent_capture.figures.fig_saturation_impact
 ```
 

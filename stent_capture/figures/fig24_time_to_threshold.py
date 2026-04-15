@@ -110,5 +110,10 @@ def generate(show: bool = False) -> None:
     plt.close(fig)
 
 
+def main():
+    """Entry point for regenerate_original_results."""
+    generate()
+
+
 if __name__ == "__main__":
     generate()

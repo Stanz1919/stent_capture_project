@@ -40,7 +40,19 @@
       "Bash(python -m pytest stent_capture/tests/test_capture_criterion.py::TestLoadingSweep::test_capture_distance_positive_at_100pg -v)",
       "Bash(python -m stent_capture.data.comsol_loader)",
       "Bash(python -m stent_capture.figures.fig25_comsol_multigeometry)",
-      "Bash(python -m pytest stent_capture/tests/ -q)"
+      "Bash(python -m pytest stent_capture/tests/ -q)",
+      "Bash(rm RESUME_PART3.md)",
+      "Bash(rm scripts/fix_fig16_200pg.py)",
+      "Bash(rm scripts/generate_200pg_results.py)",
+      "Bash(mv stent_capture/figures/fig04_comsol_gradient_validation.py stent_capture/figures/fig25_comsol_gradient_validation.py)",
+      "Bash(python -m pytest stent_capture/tests/ -v)",
+      "Bash(python -m scripts.regenerate_original_results)",
+      "Bash(tee /tmp/regen.log)",
+      "Bash(python -m stent_capture.figures.fig22_concentration_field)",
+      "Bash(python -m stent_capture.figures.fig23_concentration_vs_distance)",
+      "Bash(python -m stent_capture.figures.fig24_time_to_threshold)",
+      "Bash(grep \"\\\\.png$\")",
+      "Bash(grep \"\\\\.pdf$\")"
     ]
   }
 }

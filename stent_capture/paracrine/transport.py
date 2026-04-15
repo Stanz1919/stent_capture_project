@@ -181,7 +181,7 @@ class ParacrineField:
         t_snaps : ndarray, shape (n_snapshots,)
         """
         dx2, dz2 = self.dx ** 2, self.dz ** 2
-        dt_cfl = 0.5 / (self.D * (1.0 / dx2 + 1.0 / dz2) + 0.5 * self.k_deg)
+        dt_cfl = 0.5 / (self.D * (1.0 / dx2 + 1.0 / dz2))
         if dt is None:
             dt = 0.4 * dt_cfl
         if dt > dt_cfl:

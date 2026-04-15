@@ -22,7 +22,7 @@ from numpy import pi
 # Shared helpers
 # ---------------------------------------------------------------------------
 
-_DEFAULT_STENT = dict(n_struts=8, R=1.5e-3, w=100e-6, t=80e-6, L=500e-6, M=1.0e6)
+_DEFAULT_STENT = dict(n_struts=12, R=1.5e-3, w=100e-6, t=80e-6, L=500e-6, M=1.0e6)
 
 
 def _make_ring(**kw) -> StentRing:

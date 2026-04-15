@@ -45,7 +45,7 @@ from stent_capture.physics.external_field import TotalField, UniformExternalFiel
 # ---------------------------------------------------------------------------
 
 # Default stent (matches DEFAULTS in figures/common.py)
-_DEFAULT = dict(n_struts=8, R=1.5e-3, w=100e-6, t=80e-6, L=500e-6, M=1.0e6)
+_DEFAULT = dict(n_struts=12, R=1.5e-3, w=100e-6, t=80e-6, L=500e-6, M=1.0e6)
 
 
 def _make_ring(**kw) -> StentRing:

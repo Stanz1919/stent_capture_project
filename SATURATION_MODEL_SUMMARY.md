@@ -187,36 +187,34 @@ cell = SPIONLabelledCell(spion_mass_per_cell=50e-15, spion_sat_magnetization=Non
 
 ---
 
-## Recommendations
+## Recommendations — THESIS APPROACH (FINALIZED)
 
 ### For Dissertation
 
-**Recommended Approach: Option A (Hybrid)**
+**Chosen Approach: Langevin Saturation as Primary Model**
 
-1. **Use constant-chi results** as primary (already validated, conservative)
-2. **Mention saturation sensitivity** in Discussion section
-3. **Add statement:** "Sensitivity analysis with realistic Langevin saturation model shows ~20-30% reduction in capture predictions, indicating results are robust to susceptibility assumptions"
+The Langevin saturation model is now the code default and recommended as the primary thesis model because:
 
-**Pros:**
-- Maintains validated results
-- Shows awareness of physics limitations
-- Provides confidence bounds
-- Educational (discusses saturation)
+1. **Physically more accurate** — accounts for real SPION saturation at high fields (both external B₀ and stent-induced fields)
+2. **Consistent with COMSOL** — the FEM stent model (μᵣ=2) also saturates; using a saturating SPION model improves physical alignment
+3. **Validated robustness** — captures *only* ~20-30% reduction despite 5.7× χ reduction due to already-saturated behavior in the injection zone; strong indication that key results are insensitive to susceptibility model choice
+4. **Clear narrative** — leads with the physically sound model and documents the saturation effect transparently
+
+**Thesis wording:** "SPIONs are modelled using the Langevin saturation function, which realistically accounts for susceptibility reduction at high applied fields. Sensitivity analysis at constant susceptibility produces ~20-30% higher capture predictions but does not qualitatively change the static-vs-trajectory conclusion."
 
 ### For Code
 
-**Recommended:** Keep both models in codebase
+Both models remain available via the `spion_sat_magnetization` parameter:
 
 ```python
-# Production: Langevin (realistic)
-SPIONLabelledCell()
+# Primary (default): Langevin saturation, physically realistic
+cell = SPIONLabelledCell(spion_mass_per_cell=50e-15)
 
-# For comparison: constant-chi
-SPIONLabelledCell(spion_sat_magnetization=None)
+# Alternative: constant-chi (backward-compatible, for cross-checks)
+cell = SPIONLabelledCell(spion_mass_per_cell=50e-15, spion_sat_magnetization=None)
 ```
 
-Benefits:
-- Default is more correct
+This preserves flexibility while making the physically sound choice the default.
 - Easy to benchmark against constant-chi
 - Users can choose based on their needs
 - Fully backward-compatible

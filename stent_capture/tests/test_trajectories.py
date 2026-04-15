@@ -30,7 +30,7 @@ from stent_capture.simulation.trajectories import integrate_trajectory
 # Shared fixtures
 # ---------------------------------------------------------------------------
 
-_STENT = dict(n_struts=8, R=1.5e-3, w=100e-6, t=80e-6, L=500e-6)
+_STENT = dict(n_struts=12, R=1.5e-3, w=100e-6, t=80e-6, L=500e-6)
 _R_VES = 1.54e-3
 
 

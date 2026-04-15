@@ -1,6 +1,6 @@
 """
-Regenerate ALL original results (figs 1-24 with 10 pg default SPION loading).
-Fills in missing figures from the original results/ folder.
+Regenerate ALL results (figs 1-24 original + figs 25-26 COMSOL validation).
+Generates the complete results/ folder with thesis defaults (50 pg SPION, 12 struts, Langevin).
 """
 
 import sys
@@ -22,6 +22,7 @@ from stent_capture.figures import (
     fig17_spion_loading_sweep, fig18_single_trajectory, fig19_trajectory_bundle,
     fig20_capture_efficiency, fig21_static_vs_trajectory,
     fig22_concentration_field, fig23_concentration_vs_distance, fig24_time_to_threshold,
+    fig25_comsol_gradient_validation, fig26_comsol_multigeometry,
 )
 
 # List of (module, description, stage)
@@ -50,22 +51,25 @@ FIGURES = [
     (fig22_concentration_field, "Concentration field (VEGF)", "Stage 3c"),
     (fig23_concentration_vs_distance, "Concentration vs distance", "Stage 3c"),
     (fig24_time_to_threshold, "Time to threshold", "Stage 3c"),
+    (fig25_comsol_gradient_validation, "COMSOL gradient validation", "Validation"),
+    (fig26_comsol_multigeometry, "COMSOL multi-geometry", "Validation"),
 ]
 
 def main():
     print(f"\n{'='*80}")
-    print("REGENERATING ALL ORIGINAL RESULTS (DEFAULT 10 PG SPION LOADING)")
+    print("REGENERATING ALL RESULTS (26 FIGURES WITH THESIS DEFAULTS)")
     print(f"Output directory: {proj_root / 'results'}")
     print(f"{'='*80}\n")
 
     t_start = time.time()
     success_count = 0
     fail_count = 0
+    n_figs = len(FIGURES)
 
     for i, (module, description, stage) in enumerate(FIGURES, 1):
         try:
             fig_name = module.__name__.split('.')[-1]
-            print(f"[{i:2d}/24] {fig_name:35s} | {description:35s} | {stage:10s}", end=" ... ", flush=True)
+            print(f"[{i:2d}/{n_figs}] {fig_name:35s} | {description:35s} | {stage:10s}", end=" ... ", flush=True)
 
             t0 = time.time()
             module.main()

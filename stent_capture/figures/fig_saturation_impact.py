@@ -16,7 +16,7 @@ Parameters
 - SPION: chi_0 = 2.0 (low-field limit), M_sat = 446 kA/m (magnetite, Furlani & Ng 2006)
 - Stent: 8 struts, R = 1.5 mm, 80 µm thick, M = 2.20 MA/m (COMSOL-calibrated at B0=1.5T)
 - B₀ = 1.5 T axial (MRI strength)
-- Blood flow: v = 0.2 m/s (MCA mean, Aaslid 1982)
+- Blood flow: v = 0.2 m/s (distal/M2-representative)
 
 Run standalone::
 
