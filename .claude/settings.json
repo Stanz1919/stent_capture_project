@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -c user.name=Stanz1919 -c user.email=samlukaitis5@gmail.com commit -m ':*)",
+      "Bash(python -)",
+      "Bash(python -m stent_capture.figures.fig03_gradient_vs_distance)",
+      "Bash(python -m stent_capture.figures.fig06_n_struts)",
+      "Bash(python -m stent_capture.figures.fig14_force_vs_distance)",
+      "Bash(python -c ':*)",
+      "Bash(python)",
+      "Bash(python -m stent_capture.figures.fig16_capture_map)",
+      "Bash(cat)",
+      "Read(//tmp/**)",
+      "Bash(python -m stent_capture.figures.fig04_comsol_gradient_validation)",
+      "Bash(git checkout:*)",
+      "Bash(python -m pytest stent_capture/tests/test_magnetic_force.py -v)",
+      "Bash(python -c \"import stent_capture.physics.magnetic_force as mf; cell = mf.SPIONLabelledCell\\(\\); print\\(cell\\)\")",
+      "Bash(python -m stent_capture.figures.fig_saturation_impact)",
+      "Bash(git commit -m 'Implement SPION Langevin saturation model:*)",
+      "Bash(git push:*)",
+      "Bash(ls -lh output/fig_saturation_impact.*)",
+      "Bash(python -c \"from stent_capture.figures.common import OUT; print\\(OUT\\)\")",
+      "Bash(ls -lh results/fig_saturation_impact.*)"
+    ]
+  }
+}
