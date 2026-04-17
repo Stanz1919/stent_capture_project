@@ -172,8 +172,8 @@ Periodic x BC adds off-diagonal entries linking rows `j` and
 
 | Parameter | Code | Literature | Source | Agreement |
 |---|---|---|---|---|
-| `D` (VEGF in tissue) | 1.04 × 10⁻¹¹ m²/s | ~10⁻¹¹ m²/s | Mac Gabhann & Popel 2006 | ✅ exact |
-| `k_deg` (first-order) | 1.93 × 10⁻⁴ s⁻¹ (t½ ≈ 60 min) | 30–90 min tissue t½ | Stefanini 2008 | ✅ midrange |
+| `D` (VEGF in tissue) | 1.04 × 10⁻¹⁰ m²/s | 1.04 × 10⁻¹⁰ m²/s | Mac Gabhann & Popel 2006 | ✅ exact |
+| `k_deg` (first-order) | 1.93 × 10⁻⁴ s⁻¹ (t½ ≈ 60 min) | 30–90 min tissue t½ | In vitro (Kleinheinz et al. 2010, Chen et al.; via PLOS ONE 2011 mouse model) | ✅ midrange |
 | Diffusion length L_D | √(D/k) ≈ 232 µm | — | derived | ✅ |
 
 **Concern.** The explicit Euler stability limit
@@ -195,9 +195,9 @@ ng/(mL·s). The `10³` factor is correct (`1 g/m³ = 10⁶ ng/m³ =
 
 | Parameter | Code | Source | Notes |
 |---|---|---|---|
-| q_cell | 0.068 molecules/cell/s ≈ 5.08e-21 g/s | Stefanini 2008 | ⚠ originally per myonuclear domain, repurposed per EC |
-| σ (cell radius) | 10 µm | standard EC | ✅ |
-| h (tissue slab) | 20 µm | ~2 cell layers | ⚠ order-of-magnitude choice |
+| q_cell | 0.068 molecules/cell/s ≈ 5.08e-21 g/s | Yen et al. 2011 mouse VEGF model | ✅ Combined VEGF164 + VEGF120 isoforms |
+| σ (cell radius) | 10 µm | order-of-magnitude | ⚠ No reference; rough approximation (ECs are 30-50 µm × 10-30 µm elongated, not spherical) |
+| h (tissue slab) | 20 µm | order-of-magnitude | ⚠ No reference; ~2 cell layers (thin dimension ~0.1-10 µm) |
 
 **Concern.** The Stefanini secretion rate was calibrated against a
 *two-compartment mouse muscle model* in which the "source" is a whole
@@ -312,9 +312,9 @@ Not imported anywhere. Can stay.
 | Vessel radius | 1.54 mm | M1 MCA 1.25–1.75 mm | Jin 2021 | ✅ |
 | Mean velocity | 0.2 m/s | 0.62 m/s healthy, 0.1–0.4 m/s distal/aged | Aaslid 1982; Schöning 1994 | ✅ defensible, now correctly labelled |
 | B₀ default | 0.5 T | 0.1 T (Polyak, Tefft); 1.5–3 T (MRI-guided) | literature span | ✅ bracketed by the project's own 0–1 T sweeps |
-| VEGF D (tissue) | 1.04 × 10⁻¹¹ m²/s | 1 × 10⁻¹¹ m²/s | Mac Gabhann & Popel 2006 | ✅ |
-| VEGF k_deg | 1.93 × 10⁻⁴ s⁻¹ (t½ ≈ 60 min) | 30–90 min tissue t½ | Stefanini 2008 | ✅ |
-| VEGF therapeutic band | 5–25 ng/mL | 5–25 ng/mL | Ozawa 2004 | ✅ |
+| VEGF D (tissue) | 1.04 × 10⁻¹⁰ m²/s | 1.04 × 10⁻¹⁰ m²/s | Mac Gabhann & Popel 2006 | ✅ |
+| VEGF k_deg | 1.93 × 10⁻⁴ s⁻¹ (t½ ≈ 60 min) | 30–90 min tissue t½ | In vitro (Kleinheinz et al. 2010, Chen et al.; via PLOS ONE 2011 mouse model) | ✅ |
+| VEGF therapeutic band | 5–25 ng/mL | no direct source | ⚠ Engineering approximation; Ozawa 2004 reports cell production rates (5-70 ng/10⁶ cells/day), not tissue ng/mL |
 
 ---
 

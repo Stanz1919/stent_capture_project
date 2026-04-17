@@ -74,10 +74,6 @@ def generate(show: bool = False) -> None:
         ax.scatter(cell_pos[:, 1] * 1e6, cell_pos[:, 0] * 1e6,
                    marker=".", s=4, color="gray", alpha=0.5, label="Captured cells")
 
-        if np.max(C) >= C_THERAPEUTIC_LOW:
-            ax.contour(z_um, x_um, C, levels=[C_THERAPEUTIC_LOW],
-                       colors=[COLORS_THRESHOLD], linewidths=1.3, linestyles="--", alpha=0.9)
-
         ax.set_xlabel("Axial position (um)")
         ax.set_title(f"{title}\nMax concentration = {np.max(C):.2f} ng/mL")
         ax.text(0.02, 0.98, f"{n_total} cells", transform=ax.transAxes, fontsize=8,

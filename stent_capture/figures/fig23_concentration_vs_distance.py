@@ -1,8 +1,11 @@
 """
 fig23 — VEGF concentration vs distance from captured cells
 ===========================================================
-Radial C(r) profiles for basal and enhanced (100x) secretion,
-with the Ozawa et al. (2004) therapeutic window shaded.
+Radial C(r) profiles for normal and threshold secretion rates
+(Ozawa et al. 2004 categories), showing concentration decay with distance.
+
+Normal: 37.5 ng/10^6 cells/day (midpoint of normal angiogenesis range)
+Threshold: 85 ng/10^6 cells/day (midpoint of threshold angiogenesis range)
 """
 
 from __future__ import annotations
@@ -12,13 +15,14 @@ import matplotlib.pyplot as plt
 
 from stent_capture.figures.common import make_ring, save_fig, DEFAULTS
 from stent_capture.paracrine.transport import ParacrineField, L_DIFFUSION
-from stent_capture.paracrine.secretion import VEGFSource, Q_CELL_G_PER_S
-from stent_capture.paracrine.therapeutic import (
-    concentration_vs_distance,
-    therapeutic_zone_radius,
-    C_THERAPEUTIC_LOW,
-    C_THERAPEUTIC_HIGH,
-)
+from stent_capture.paracrine.secretion import VEGFSource
+from stent_capture.paracrine.therapeutic import concentration_vs_distance
+
+
+def q_cell_from_ozawa_rate(population_rate_ng_per_million_per_day: float) -> float:
+    """Convert Ozawa population secretion rate (ng/10^6 cells/day) to per-cell rate (g/s)."""
+    rate_g_per_cell_per_s = (population_rate_ng_per_million_per_day * 1e-9) / 1e6 / 86400
+    return rate_g_per_cell_per_s
 
 
 def _dense_cell_positions(ring, z_centre, Lx, n_per_strut=40):
@@ -41,17 +45,18 @@ def generate(show: bool = False) -> None:
     Lz = 4.0 * DEFAULTS["L"]
     z_centre = Lz / 2.0
 
-    cell_pos = _dense_cell_positions(ring, z_centre, Lx, n_per_strut=40)
+    cell_pos = _dense_cell_positions(ring, z_centre, Lx, n_per_strut=80)
 
     fig, ax = plt.subplots(figsize=(9, 6))
-    r_max_plot = 3.0 * L_DIFFUSION
+    r_max_plot = 600e-6  # 600 um (most values within first 600 um)
 
-    for mult, label, color, ls in [
-        (1, "Basal (1x)", "#3498db", "-"),
-        (100, "Enhanced (100x)", "#e74c3c", "-"),
+    for ozawa_rate, label, color, ls in [
+        (37.5, "Normal (37.5 ng/M)", "#3498db", "-"),
+        (85.0, "Threshold (85 ng/M)", "#e74c3c", "-"),
     ]:
-        field = ParacrineField(Lx=Lx, Lz=Lz, Nx=300, Nz=300)
-        src = VEGFSource(q_cell=mult * Q_CELL_G_PER_S)
+        q_cell = q_cell_from_ozawa_rate(ozawa_rate)
+        field = ParacrineField(Lx=Lx, Lz=Lz, Nx=600, Nz=600)
+        src = VEGFSource(q_cell=q_cell)
         field.source = src.source_field(field.X, field.Z, cell_pos)
         C = field.solve_steady_state()
 
@@ -61,28 +66,12 @@ def generate(show: bool = False) -> None:
         r_um = r_centres * 1e6
         ax.plot(r_um, C_mean, color=color, ls=ls, lw=2.0, label=label)
 
-        r_tz = therapeutic_zone_radius(C, field.X, field.Z, cell_pos,
-                                       threshold=C_THERAPEUTIC_LOW)
-        if r_tz > 0:
-            ax.axvline(r_tz * 1e6, color=color, ls=":", lw=1.2, alpha=0.7)
-            ax.annotate(f"{r_tz*1e6:.0f} um", xy=(r_tz*1e6, C_THERAPEUTIC_LOW),
-                        xytext=(r_tz*1e6 + 30, C_THERAPEUTIC_LOW * 2.0),
-                        fontsize=9, color=color, fontweight='bold',
-                        arrowprops=dict(arrowstyle="->", color=color, lw=1.0))
-
-    # Therapeutic window
-    ax.axhspan(C_THERAPEUTIC_LOW, C_THERAPEUTIC_HIGH,
-               color="#2ecc71", alpha=0.15,
-               label=f"Therapeutic zone ({C_THERAPEUTIC_LOW}-{C_THERAPEUTIC_HIGH} ng/mL)")
-    ax.axhline(C_THERAPEUTIC_LOW, color="#2ecc71", ls="--", lw=1.0, alpha=0.8)
-    ax.axhline(C_THERAPEUTIC_HIGH, color="#2ecc71", ls="--", lw=1.0, alpha=0.8)
-
     ax.axvline(L_DIFFUSION * 1e6, color="gray", ls="-.", lw=1.0, alpha=0.6,
                label=f"Diffusion length L_D = {L_DIFFUSION*1e6:.0f} um")
 
     ax.set_xlabel("Distance from nearest captured cell (um)")
     ax.set_ylabel("VEGF concentration (ng/mL)")
-    ax.set_title("Figure 23: Concentration Profile with Therapeutic Window (320 cells)")
+    ax.set_title("Figure 23: VEGF Concentration Profile vs Distance (640 cells)")
     ax.set_xlim(0, r_max_plot * 1e6)
     ax.set_ylim(bottom=0)
     ax.legend(fontsize=9, loc="upper right", framealpha=0.95)

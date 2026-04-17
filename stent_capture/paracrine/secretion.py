@@ -16,9 +16,9 @@ Literature values
 -----------------
 q_cell  = 0.068 molecules / cell / s  (VEGF₁₆₅)
         = 5.08 × 10⁻²¹ g / s         (MW_VEGF = 45 kDa)
-    Stefanini MO et al. (2008) PLoS ONE 3(11):e3565.
-    (Calibrated against two-compartment mouse model; originally per
-    myonuclear domain, here applied per single endothelial cell.)
+    Yen P et al. (2011) PLoS ONE 6(2):e27514 (mouse VEGF distribution model).
+    (Combined VEGF164 + VEGF120 secretion; originally per myonuclear domain,
+    here applied per single endothelial cell.)
 
 Independent measurement:
     0.001 pg / cell / day  (= 1.16 × 10⁻²⁰ g/s)  — retinal endothelial cells.
@@ -35,7 +35,7 @@ import numpy as np
 MW_VEGF  = 45_000.0     # g / mol
 N_A      = 6.022e23      # molecules / mol
 
-Q_CELL_MOL_PER_S = 0.068                      # molecules / cell / s  (Stefanini 2008)
+Q_CELL_MOL_PER_S = 0.068                      # molecules / cell / s  (Yen et al. 2011, mouse VEGF model)
 Q_CELL_G_PER_S   = Q_CELL_MOL_PER_S * MW_VEGF / N_A   # ≈ 5.08e-21 g/s
 
 SIGMA_DEFAULT     = 10e-6     # m  — cell radius
@@ -50,7 +50,7 @@ class VEGFSource:
     ----------
     q_cell : float
         VEGF secretion rate per cell (g s⁻¹).
-        Default from Stefanini et al. (2008).
+        Default from Yen et al. (2011) mouse VEGF model.
     sigma : float
         Gaussian half-width (m).  Default 10 µm (cell radius).
     h_tissue : float

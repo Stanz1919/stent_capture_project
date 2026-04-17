@@ -76,7 +76,6 @@ ax = axes[0]
 levels = np.linspace(0, max(C_no_adv.max(), C_with_adv.max()), 16)
 im = ax.contourf(pf_no_adv.X*1e6, pf_no_adv.Z*1e6, C_no_adv, levels=levels, cmap=COLORS_CONCENTRATION)
 ax.scatter(cell_pos[:, 0]*1e6, cell_pos[:, 1]*1e6, c=COLORS_MARKER_SOURCE, s=40, marker='x', linewidth=2.5, label='Cell source')
-ax.contour(pf_no_adv.X*1e6, pf_no_adv.Z*1e6, C_no_adv, levels=[C_THERAPEUTIC_LOW], colors=[COLORS_THRESHOLD], linewidths=1.5, linestyles='--', alpha=0.9)
 ax.set_xlabel('Circumferential position (um)')
 ax.set_ylabel('Axial position (um)')
 ax.set_title('(a) Baseline: No advection')
@@ -88,7 +87,6 @@ ax.legend(fontsize=9, loc='lower center', ncol=1, framealpha=0.95)
 ax = axes[1]
 im = ax.contourf(pf_with_adv.X*1e6, pf_with_adv.Z*1e6, C_with_adv, levels=levels, cmap=COLORS_CONCENTRATION)
 ax.scatter(cell_pos[:, 0]*1e6, cell_pos[:, 1]*1e6, c=COLORS_MARKER_SOURCE, s=40, marker='x', linewidth=2.5, label='Cell source')
-ax.contour(pf_with_adv.X*1e6, pf_with_adv.Z*1e6, C_with_adv, levels=[C_THERAPEUTIC_LOW], colors=[COLORS_THRESHOLD], linewidths=1.5, linestyles='--', alpha=0.9)
 # Velocity vector annotation positioned to avoid text overlap
 ax.arrow(Lx*1e6*0.08, Lz*1e6*0.85, 0, -35, head_width=25, head_length=25, fc=COLORS_VECTOR, ec=COLORS_VECTOR, linewidth=2.5, alpha=0.85)
 ax.text(Lx*1e6*0.25, Lz*1e6*0.82, f'Flow: u_z = {u_axial*1e6:.0f} um/s', color=COLORS_VECTOR, fontsize=11, fontweight='bold', bbox=dict(boxstyle='round,pad=0.4', facecolor='black', alpha=0.6, edgecolor=COLORS_VECTOR, linewidth=1))

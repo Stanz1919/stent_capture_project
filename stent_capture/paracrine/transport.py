@@ -22,10 +22,12 @@ tissue diffusion coefficient, *u* is the tissue interstitial velocity,
 *k* is the first-order degradation rate, and *S* is the volumetric source
 term from captured cells.
 
-Advection is included to account for tissue interstitial flow (~50–100 µm/s,
-primarily axial). The Péclet number Pe = |u| L / D ≈ 5 over L = 500 µm,
-so advection is secondary but non-negligible and affects the time-to-threshold
-and therapeutic-zone extent.
+Advection is included to account for tissue interstitial flow. Typical values:
+~1 µm/s in normal tissue, 10–100 µm/s in inflamed/pathological tissue.
+The Péclet number Pe = |u| L_D / D, where L_D ≈ 730 µm (VEGF diffusion length),
+ranges Pe ≈ 7 (normal) to Pe ≈ 350 (inflamed), so advection can range from
+secondary to dominant depending on tissue condition. Advection affects both
+peak concentration and spatial distribution.
 
 Steady state is obtained by solving the sparse linear system directly
 (``scipy.sparse.linalg.spsolve``).  Transient solutions use explicit
@@ -33,13 +35,13 @@ Euler with automatic CFL-limited time stepping.
 
 Literature parameters
 ---------------------
-D = 1.04 × 10⁻¹¹ m²/s  (VEGF₁₆₅ in tissue ECM)
+D = 1.04 × 10⁻¹⁰ m²/s  (VEGF₁₆₅ in tissue ECM, in vivo skeletal muscle)
     Mac Gabhann F & Popel AS (2006) PLoS Comput Biol 2(10):e127.
 
 k = 1.93 × 10⁻⁴ s⁻¹    (half-life ≈ 60 min in tissue)
-    Stefanini MO et al. (2008) PLoS ONE 3(11):e3565.
+    In vitro (Kleinheinz et al. 2010, Chen et al.; via PLOS ONE 2011 mouse model).
 
-Characteristic diffusion length: L_D = √(D/k) ≈ 232 µm.
+Characteristic diffusion length: L_D = √(D/k) ≈ 734 µm.
 
 Tissue interstitial velocity: u_z ~ 50–100 µm/s (axial, order-of-magnitude).
     Piwnica-Worms et al. (1999); tissue fluid velocity is typically 0.1–10 µm/s
@@ -54,9 +56,9 @@ from scipy.sparse.linalg import spsolve
 
 
 # ── Default physical constants ──────────────────────────────────────
-D_VEGF_TISSUE  = 1.04e-11   # m²/s  — Mac Gabhann & Popel 2006
-K_DEG_TISSUE   = 1.93e-4    # s⁻¹   — Stefanini et al. 2008
-L_DIFFUSION    = np.sqrt(D_VEGF_TISSUE / K_DEG_TISSUE)  # ≈ 232 µm
+D_VEGF_TISSUE  = 1.04e-10   # m²/s  — Mac Gabhann & Popel 2006 (VEGF164 in vivo)
+K_DEG_TISSUE   = 1.93e-4    # s⁻¹   — In vitro (Kleinheinz et al. 2010, Chen et al.; via PLOS ONE 2011 mouse model)
+L_DIFFUSION    = np.sqrt(D_VEGF_TISSUE / K_DEG_TISSUE)  # ≈ 734 µm
 
 
 class ParacrineField:
@@ -125,54 +127,72 @@ class ParacrineField:
         """
         Solve  D ∇²C − u·∇C − k C = −S  for the steady-state concentration.
 
-        Advection term is included if u_axial is set.
+        Advection term is included if u_axial is set (axial z-direction).
+        x is circumferential (periodic if ``periodic_x``), z is axial (zero-flux).
 
         Returns C(x, z) in ng mL⁻¹, shape (Nx, Nz).
         """
-        N  = self.Nx * self.Nz
+        Nx, Nz = self.Nx, self.Nz
+        N   = Nx * Nz
         dx2 = self.dx ** 2
         dz2 = self.dz ** 2
         D   = self.D
         k   = self.k_deg
         u_z = self.u_axial if self.u_axial is not None else 0.0
 
-        diag   = np.full(N, -2.0 * D / dx2 - 2.0 * D / dz2 - k)
-        off_x  = np.full(N, D / dx2)
-        # z-advection: upwind-like modification to z-stencil
-        off_z_upper = np.full(N, D / dz2 - u_z / (2.0 * self.dz))
-        off_z_lower = np.full(N, D / dz2 + u_z / (2.0 * self.dz))
-
-        diags  = [diag, off_x[:N-1], off_x[:N-1],
-                  off_z_upper[:N-self.Nz], off_z_lower[:N-self.Nz]]
-        offsets = [0, 1, -1, self.Nz, -self.Nz]
-
-        A = sparse.diags(diags, offsets, shape=(N, N), format='lil')
-
-        Nz = self.Nz
-        Nx = self.Nx
-
-        for i in range(Nx):
-            # z-direction zero-flux: mirror at j=0 and j=Nz-1
-            idx0 = i * Nz
-            A[idx0, idx0] += D / dz2 - u_z / (2.0 * self.dz)
-            idx_end = i * Nz + Nz - 1
-            A[idx_end, idx_end] += D / dz2 + u_z / (2.0 * self.dz)
-
+        # ── 1-D Laplacian in x (circumferential) ──
         if self.periodic_x:
-            for j in range(Nz):
-                i_first = j                     # i=0
-                i_last  = (Nx - 1) * Nz + j     # i=Nx-1
-                A[i_first, i_last] += D / dx2
-                A[i_last, i_first] += D / dx2
+            main_x = np.full(Nx, -2.0)
+            off_x  = np.ones(Nx - 1)
+            Lx_1d = sparse.diags([off_x, main_x, off_x], [-1, 0, 1],
+                                 shape=(Nx, Nx), format='lil')
+            Lx_1d[0, Nx - 1] = 1.0
+            Lx_1d[Nx - 1, 0] = 1.0
         else:
-            for j in range(Nz):
-                A[j, j] += D / dx2
-                A[(Nx-1)*Nz + j, (Nx-1)*Nz + j] += D / dx2
+            main_x = np.full(Nx, -2.0)
+            main_x[0] = -1.0       # zero-flux ghost cell
+            main_x[-1] = -1.0
+            off_x  = np.ones(Nx - 1)
+            Lx_1d = sparse.diags([off_x, main_x, off_x], [-1, 0, 1],
+                                 shape=(Nx, Nx), format='lil')
+        Lx_1d = Lx_1d.tocsr() / dx2
+
+        # ── 1-D Laplacian in z (zero-flux) ──
+        main_z = np.full(Nz, -2.0)
+        main_z[0]  = -1.0          # zero-flux ghost cell: -2C+C = -C
+        main_z[-1] = -1.0
+        off_z  = np.ones(Nz - 1)
+        Lz_1d = sparse.diags([off_z, main_z, off_z], [-1, 0, 1],
+                             shape=(Nz, Nz), format='csr') / dz2
+
+        # ── 1-D advection in z (central difference, zero-flux at ends) ──
+        # ∂C/∂z stencil: upper = +1/(2dz), lower = -1/(2dz); boundaries use one-sided
+        if u_z != 0.0:
+            main_a = np.zeros(Nz)
+            upper  = np.full(Nz - 1,  1.0 / (2.0 * self.dz))
+            lower  = np.full(Nz - 1, -1.0 / (2.0 * self.dz))
+            # Forward diff at j=0: (C[1]-C[0])/dz; backward diff at j=Nz-1
+            main_a[0]  = -1.0 / self.dz
+            upper[0]   =  1.0 / self.dz
+            main_a[-1] =  1.0 / self.dz
+            lower[-1]  = -1.0 / self.dz
+            Adv_1d = sparse.diags([lower, main_a, upper], [-1, 0, 1],
+                                  shape=(Nz, Nz), format='csr')
+        else:
+            Adv_1d = sparse.csr_matrix((Nz, Nz))
+
+        # ── 2-D operator: L = D*(Lx ⊗ I + I ⊗ Lz) − u_z*(I ⊗ Adv) − k*I ──
+        I_x = sparse.eye(Nx, format='csr')
+        I_z = sparse.eye(Nz, format='csr')
+
+        A = (D * (sparse.kron(Lx_1d, I_z) + sparse.kron(I_x, Lz_1d))
+             - u_z * sparse.kron(I_x, Adv_1d)
+             - k * sparse.eye(N, format='csr'))
 
         A = A.tocsc()
         rhs = -self._source.ravel()
         C = spsolve(A, rhs)
-        return C.reshape(self.Nx, self.Nz)
+        return C.reshape(Nx, Nz)
 
     # ── Transient solve ─────────────────────────────────────────────
 

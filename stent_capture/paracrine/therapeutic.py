@@ -10,10 +10,18 @@ exceeds a biologically meaningful threshold.
 
 Literature thresholds
 ---------------------
-C_therapeutic ∈ [5, 25] ng mL⁻¹  — range for normal, productive angiogenesis.
-C_aberrant    > 100  ng mL⁻¹      — onset of aberrant vessel growth.
+C_therapeutic ∈ [5, 25] ng mL⁻¹  — Engineering choice; not directly from literature.
+    Ozawa et al. (2004) reports cell VEGF production rates (5-70 ng/10⁶ cells/day
+    for normal angiogenesis), not tissue microenvironmental concentrations (ng/mL).
+    The 5-25 ng/mL used here is an order-of-magnitude approximation for the
+    paracrine simulation domain.
+
+C_aberrant    > 100  ng mL⁻¹      — Engineering choice; no direct literature source.
+    Related to Ozawa's finding that ≥100 ng/10⁶ cells/day production triggers
+    aberrant angiogenesis, but this is cell production rate, not tissue concentration.
 
     Ozawa CR et al. (2004) J Clin Invest 113(4):516–27.
+    doi: 10.1172/JCI18420
 
 Note on residence-time shortcuts
 ---------------------------------
@@ -31,9 +39,9 @@ from __future__ import annotations
 import numpy as np
 
 
-C_THERAPEUTIC_LOW  = 5.0    # ng/mL  — Ozawa et al. 2004
-C_THERAPEUTIC_HIGH = 25.0   # ng/mL
-C_ABERRANT         = 100.0  # ng/mL
+C_THERAPEUTIC_LOW  = 5.0    # ng/mL  — Engineering approximation (not directly from literature)
+C_THERAPEUTIC_HIGH = 25.0   # ng/mL  — Order-of-magnitude choice for paracrine domain
+C_ABERRANT         = 100.0  # ng/mL  — Related to Ozawa threshold but different units (ng/10⁶ cells/day)
 
 
 def therapeutic_zone_radius(

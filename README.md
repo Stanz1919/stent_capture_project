@@ -60,12 +60,19 @@ loading per cell, Langevin saturation model, 12-strut geometry):
   zone already forces both models into a near-saturated regime).
   **Results are robust to the SPION saturation assumption.**
 
-- **VEGF paracrine analysis** (fig 22–24): basal EC secretion
-  (Stefanini 2008, 0.068 molecules / cell / s) produces sub-threshold
-  VEGF concentrations (< 1 ng/mL) even with ~320 captured cells.
-  100×-enhanced secretion (modelling transfected cells, Chorny 2007
-  / Polyak 2008) reaches the 5–25 ng/mL therapeutic band of Ozawa
-  (2004) within ~20 minutes at 250 µm from the vessel wall.
+- **VEGF paracrine analysis** (fig 22–24, 27–29): basal EC secretion
+  (0.068 molecules / cell / s, Yen 2011) produces sub-ng/mL tissue
+  concentrations even with hundreds of captured cells. When constrained
+  by Ozawa et al. (2004) population secretion categories (normal:
+  5–70 ng/10⁶ cells/day; threshold: 70–100; aberrant: >100), the model
+  shows that **~320 cells at normal secretion** or **~160 cells at
+  threshold secretion** are needed to reach tissue VEGF concentrations
+  of ~5 ng/mL. Fig 28/29 provide the parametric sweep across cell count
+  and secretion rate. Note: 5 ng/mL is an engineering reference rather
+  than a literature-validated tissue threshold — Ozawa measured
+  production rates per cell population, not tissue microenvironmental
+  concentrations. The module's value is as a tool for predicting
+  tissue VEGF distribution rather than a binary therapeutic claim.
 
 The static-vs-trajectory contrast is consistent with the experimental
 capture efficiencies reported by Polyak et al. (2008) and Tefft et al.
@@ -306,25 +313,42 @@ appropriate.
 
 ### VEGF paracrine (Stage 3c)
 
-2-D reaction–diffusion on an unrolled tissue slab around the vessel
-wall:
+2-D reaction–diffusion-advection on an unrolled tissue slab around the
+vessel wall:
 
 ```
-∂C/∂t = D ∇²C + S(x, z) − k C
+∂C/∂t = D ∇²C − u·∇C + S(x, z) − k C
 ```
 
-- `D = 1.04 × 10⁻¹¹ m²/s` — VEGF₁₆₅ in tissue ECM (Mac Gabhann &
-  Popel 2006).
-- `k = 1.93 × 10⁻⁴ s⁻¹` — first-order degradation (t½ ≈ 60 min,
-  Stefanini et al. 2008).
-- Characteristic diffusion length L_D = √(D/k) ≈ 232 µm.
+- `D = 1.04 × 10⁻¹⁰ m²/s` — VEGF₁₆₅ in tissue ECM, in vivo skeletal
+  muscle (Mac Gabhann & Popel 2006).
+- `k = 1.93 × 10⁻⁴ s⁻¹` — first-order degradation, half-life ≈ 60 min
+  (in-vitro; Kleinheinz et al. 2010, Chen et al.; via PLOS ONE 2011).
+- Characteristic diffusion length L_D = √(D/k) ≈ 734 µm.
 - Source: Gaussian kernel per captured cell at q_cell = 0.068 molecules/s
-  basal (Stefanini) or 100× for transfected cells (Chorny / Polyak).
-- Therapeutic band 5–25 ng/mL, aberrant > 100 ng/mL (Ozawa et al. 2004).
+  (Yen et al. 2011 mouse VEGF model); can be scaled to match Ozawa
+  population secretion categories.
+- Optional axial advection (tissue interstitial flow ~1–100 µm/s);
+  Péclet number Pe = u·L_D/D ranges from ~7 (normal) to ~350
+  (inflamed).
 
-Both steady-state (`scipy.sparse.linalg.spsolve`) and transient
-(explicit Euler with CFL-limited step) solvers are provided. Zero-flux
-in z, periodic in circumferential x.
+Both steady-state (sparse Kronecker construction + `scipy.sparse.linalg.
+spsolve`) and transient (explicit Euler with CFL-limited step) solvers
+are provided. Zero-flux in axial z, periodic in circumferential x.
+
+**Ozawa-constrained framing (fig 28/29):** rather than the arbitrary
+"100× basal" multiplier used in early versions, the secretion rate is
+parametrised by Ozawa et al. (2004) cell-population categories:
+
+| Category  | Rate (ng/10⁶ cells/day) | Biology                     |
+|-----------|-------------------------|-----------------------------|
+| Normal    | 5–70                    | Normal angiogenesis         |
+| Threshold | 70–100                  | Angiogenic threshold region |
+| Aberrant  | >100                    | Aberrant angiogenesis       |
+
+Note: Ozawa measures *cell production rates*, not *tissue VEGF
+concentrations*. The 5–25 ng/mL "therapeutic" band sometimes cited
+elsewhere is an engineering reference only.
 
 ---
 
@@ -357,16 +381,27 @@ in z, periodic in circumferential x.
    through-strut vs between-strut asymmetry could be > 2× and is not
    sampled.
 
-5. **Paracrine advection.** The VEGF solver is diffusion–reaction only.
-   At tissue-interstitial flow velocities (~100 µm/s) the Péclet
-   number over L = 500 µm is ~5, so advection is secondary but not
-   fully negligible. The docstring's "Pe ≪ 1" claim is conservative.
+5. **Paracrine advection.** The VEGF solver supports optional axial
+   advection. Péclet number Pe = u·L_D/D (L_D ≈ 734 µm) ranges from
+   ~7 (normal tissue, u ~1 µm/s) to ~350 (inflamed tissue, u ~50 µm/s),
+   so advection is secondary under normal conditions but can dominate
+   in pathological flow regimes. Fig 27 explores this sensitivity.
 
-6. **Paracrine secretion rate.** Stefanini 2008 calibrates q_cell
-   against a two-compartment mouse muscle model (per myonuclear
-   domain), repurposed here per single endothelial cell. The 100×
-   enhancement factor absorbs this uncertainty and matches the
-   transfection level reported by Chorny / Polyak.
+6. **Paracrine secretion rate.** q_cell = 0.068 molecules/cell/s from
+   Yen et al. (2011) mouse VEGF model — originally per myonuclear
+   domain, repurposed here per single endothelial cell. The preferred
+   approach is to parameterise secretion via Ozawa population
+   categories (normal/threshold/aberrant) rather than an arbitrary
+   basal multiplier; fig 28/29 use this framing.
+
+7. **"Therapeutic window" framing.** The 5–25 ng/mL band referenced in
+   early figures is an engineering approximation, not a validated
+   tissue threshold. Ozawa et al. (2004) reports population secretion
+   rates (ng/10⁶ cells/day), not tissue microenvironmental
+   concentrations. The module should be interpreted as a predictor of
+   tissue VEGF distribution for a given cell density and secretion
+   rate — the therapeutic significance of a given concentration
+   depends on downstream cell-response modelling outside scope.
 
 ---
 
@@ -417,15 +452,18 @@ calibration.
 
 | Parameter | Value | Source |
 |-----------|-------|--------|
-| D_VEGF_TISSUE | 1.04 × 10⁻¹¹ m²/s | Mac Gabhann & Popel 2006 |
-| K_DEG_TISSUE | 1.93 × 10⁻⁴ s⁻¹ | Stefanini et al. 2008 |
-| L_diffusion | ≈ 232 µm | √(D/k) |
-| q_cell | 0.068 molecules/cell/s | Stefanini et al. 2008 |
-| σ (Gaussian source) | 10 µm | cell radius |
-| h (tissue slab) | 20 µm | 2 cell layers |
-| C_THERAPEUTIC_LOW | 5 ng/mL | Ozawa et al. 2004 |
-| C_THERAPEUTIC_HIGH | 25 ng/mL | Ozawa et al. 2004 |
-| C_ABERRANT | 100 ng/mL | Ozawa et al. 2004 |
+| D_VEGF_TISSUE | 1.04 × 10⁻¹⁰ m²/s | Mac Gabhann & Popel 2006 (VEGF₁₆₄ in vivo) |
+| K_DEG_TISSUE | 1.93 × 10⁻⁴ s⁻¹ | In vitro (Kleinheinz 2010, Chen et al.; via PLOS ONE 2011) |
+| L_diffusion | ≈ 734 µm | √(D/k) |
+| q_cell | 0.068 molecules/cell/s | Yen et al. 2011 (mouse VEGF model) |
+| σ (Gaussian source) | 10 µm | cell radius (engineering choice) |
+| h (tissue slab) | 20 µm | ~2 cell layers (engineering choice) |
+| C_THERAPEUTIC_LOW | 5 ng/mL | Engineering reference (not directly from literature) |
+| C_THERAPEUTIC_HIGH | 25 ng/mL | Engineering reference (order-of-magnitude) |
+| C_ABERRANT | 100 ng/mL | Related to Ozawa threshold (units differ) |
+
+Ozawa population secretion categories (ng/10⁶ cells/day, Ozawa et al.
+2004): normal 5–70, threshold 70–100, aberrant >100.
 
 ---
 
