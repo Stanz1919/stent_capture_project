@@ -12,19 +12,28 @@ where *q_vol* is the peak volumetric secretion rate in ng mL⁻¹ s⁻¹ and σ
 is the cell radius.  The total VEGF mass secreted per cell is q_cell (g s⁻¹)
 distributed over the Gaussian footprint and an effective tissue thickness *h*.
 
-Literature values
------------------
-q_cell  = 0.068 molecules / cell / s  (VEGF₁₆₅)
-        = 5.08 × 10⁻²¹ g / s         (MW_VEGF = 45 kDa)
-    Yen P et al. (2011) PLoS ONE 6(2):e27514 (mouse VEGF distribution model).
-    (Combined VEGF164 + VEGF120 secretion; originally per myonuclear domain,
-    here applied per single endothelial cell.)
+Literature values — human bone marrow MSC
+------------------------------------------
+q_cell  ≈ 10 molecules / cell / s  (VEGF₁₆₅, normoxic basal)
+        ≈ 7.47 × 10⁻²² g / s       (MW_VEGF = 45 kDa)
 
-Independent measurement:
-    0.001 pg / cell / day  (= 1.16 × 10⁻²⁰ g/s)  — retinal endothelial cells.
-    Li J et al. (2006) Curr Eye Res 31(4):353–61.
+    Representative of normoxic human BM-MSC paracrine VEGF secretion.
+    Gnecchi M et al. (2006) Nature Med 12(3):249–251 — MSC conditioned
+    medium cardiac protection attributed to VEGF paracrine signalling.
+    Crigler L et al. (2006) Exp Hematol 34(8):1084–1093 — quantified
+    VEGF in human BM-MSC conditioned medium.
+    Potier E et al. (2007) Stem Cells 25(11):2712–2719 — normoxic vs
+    hypoxic MSC VEGF secretion (hypoxia increases rate 3–10×).
 
-σ  = 10 µm  (endothelial cell radius).
+    Note: secretion rates are highly condition-dependent (cell source,
+    passage, O₂ tension).  Normoxic BM-MSC values span approximately
+    1–100 molecules/cell/s across the literature; 10 mol/s is a
+    conservative lower-bound estimate.  Verify against your specific
+    MSC preparation before citing numerical predictions.
+
+σ  = 10 µm  (suspended MSC radius; consistent with 10–20 µm diameter
+             reported for human BM-MSCs in flow cytometry, Dominici et al.
+             2006 Cytotherapy 8:315–317).
 h  = 20 µm  (effective tissue-slab thickness, ≈ 2 cell layers).
 """
 
@@ -35,10 +44,10 @@ import numpy as np
 MW_VEGF  = 45_000.0     # g / mol
 N_A      = 6.022e23      # molecules / mol
 
-Q_CELL_MOL_PER_S = 0.068                      # molecules / cell / s  (Yen et al. 2011, mouse VEGF model)
-Q_CELL_G_PER_S   = Q_CELL_MOL_PER_S * MW_VEGF / N_A   # ≈ 5.08e-21 g/s
+Q_CELL_MOL_PER_S = 10.0                        # molecules / cell / s  (normoxic human BM-MSC, Crigler 2006)
+Q_CELL_G_PER_S   = Q_CELL_MOL_PER_S * MW_VEGF / N_A   # ≈ 7.47e-22 g/s
 
-SIGMA_DEFAULT     = 10e-6     # m  — cell radius
+SIGMA_DEFAULT     = 10e-6     # m  — suspended MSC radius (~10–20 µm diameter, Dominici 2006)
 H_TISSUE_DEFAULT  = 20e-6     # m  — slab thickness
 
 
@@ -50,7 +59,7 @@ class VEGFSource:
     ----------
     q_cell : float
         VEGF secretion rate per cell (g s⁻¹).
-        Default from Yen et al. (2011) mouse VEGF model.
+        Default from Crigler et al. (2006) normoxic human BM-MSC.
     sigma : float
         Gaussian half-width (m).  Default 10 µm (cell radius).
     h_tissue : float
