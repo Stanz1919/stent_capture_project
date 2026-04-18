@@ -169,8 +169,8 @@ def make_figure():
 
     print(f"  Total computation: {time.time()-t_start:.1f} s", flush=True)
 
-    # Reference values for suptitle (50 pg, v = 0.2 m/s)
-    idx_ref = int(np.where(_LOADINGS_PG == 50.0)[0][0])
+    # Reference values for suptitle (200 pg, v = 0.2 m/s — Polyak 2008)
+    idx_ref = int(np.where(_LOADINGS_PG == 200.0)[0][0])
     val_static_ref = static_a[idx_ref]
     val_traj_ref   = traj_a[idx_ref]
     ratio_str = (
@@ -200,13 +200,11 @@ def make_figure():
         ax_a.annotate(f"{tr:.0f}", xy=(m, tr), xytext=(0, 6),
                       textcoords="offset points", ha="center",
                       fontsize=7, color=_COLOR_TRAJ)
-    ax_a.axvline(50, color="gray",    ls="--", lw=1.0, alpha=0.7,
-                 label="50 pg (MCA reference)")
-    ax_a.axvline(10, color="dimgray", ls=":",  lw=1.0, alpha=0.7,
-                 label="10 pg (Polyak 2008)")
+    ax_a.axvline(200, color="gray", ls="--", lw=1.2, alpha=0.8,
+                 label="200 pg (Polyak et al. 2008)")
     ax_a.set_xlabel("SPION loading per cell (pg)", fontsize=10)
     ax_a.set_ylabel("Effective capture range ($\\mu$m)", fontsize=10)
-    ax_a.set_xlim(7, 250)
+    ax_a.set_xlim(7, 280)
     ax_a.set_ylim(0, max_y)
     ax_a.xaxis.set_major_formatter(mticker.FormatStrFormatter("%.4g"))
     ax_a.legend(fontsize=7, loc="upper left")
@@ -232,10 +230,8 @@ def make_figure():
         ax_b.annotate(f"{tr:.0f}", xy=(v, tr), xytext=(0, 6),
                       textcoords="offset points", ha="center",
                       fontsize=7, color=_COLOR_TRAJ)
-    ax_b.axvline(0.20, color="gray",    ls="--", lw=1.0, alpha=0.7,
-                 label="0.20 m/s (MCA mean)")
-    ax_b.axvline(0.05, color="dimgray", ls=":",  lw=1.0, alpha=0.7,
-                 label="0.05 m/s (Stage 3a)")
+    ax_b.axvline(0.20, color="gray", ls="--", lw=1.2, alpha=0.8,
+                 label="0.20 m/s (distal MCA mean, Aaslid et al. 1982)")
     ax_b.set_xlabel("Mean blood velocity $\\bar{v}$ (m/s)", fontsize=10)
     ax_b.set_ylabel("Effective capture range ($\\mu$m)", fontsize=10)
     ax_b.set_xlim(0.014, 0.65)
