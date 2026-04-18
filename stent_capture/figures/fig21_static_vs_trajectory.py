@@ -46,7 +46,7 @@ _V_MCA    = 0.2        # m/s  -- MCA mean (Aaslid 1982)
 _M_REF_PG = 200.0      # pg   -- reference loading for panel (b) -- Polyak et al. 2008
 _N_ITER   = 7          # binary-search depth -> ~11 um resolution
 
-_LOADINGS_PG = np.array([10., 30., 50., 100., 200.])    # panel (a)
+_LOADINGS_PG = np.array([10., 30., 50., 100., 200., 300.])    # panel (a)
 _VELOCITIES  = np.array([0.02, 0.05, 0.10, 0.20, 0.50]) # panel (b)
 
 # Trajectory settings: relax rtol slightly for speed; 1.5 s timeout
@@ -204,7 +204,7 @@ def make_figure():
                  label="200 pg (Polyak et al. 2008)")
     ax_a.set_xlabel("SPION loading per cell (pg)", fontsize=10)
     ax_a.set_ylabel("Effective capture range ($\\mu$m)", fontsize=10)
-    ax_a.set_xlim(7, 280)
+    ax_a.set_xlim(7, 380)
     ax_a.set_ylim(0, max_y)
     ax_a.xaxis.set_major_formatter(mticker.FormatStrFormatter("%.4g"))
     ax_a.legend(fontsize=7, loc="upper left")
