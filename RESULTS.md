@@ -133,9 +133,9 @@ This verification is non-trivial for the Akoun and Yonnet kernel, which involves
 
 ### 1.12 External Field Effect
 
-**Figure 12** compares the gradient magnitude profile with and without an externally applied uniform axial field, at *B*₀ = 0 T (stent magnetisation only) and *B*₀ = 1.5 T (full MRI-strength external field). The external field amplifies the effective strut magnetisation via the soft-ferromagnet response of the stent material, increasing the gradient by a factor of approximately 3.55× at *B*₀ = 1.5 T relative to *B*₀ = 0 (calibrated against COMSOL; see Section 5). This amplification has a non-linear character: the gradient enhancement is not simply additive because the external field also raises the background |**B**| everywhere, modifying the direction of **∇**|**B**_total**| relative to **∇**|**B**_stent**| through projection effects.
+**Figure 12** illustrates the effect of an externally applied axial field on the gradient and force-parameter profiles across the range *B*₀ = 0–1.5 T. An important subtlety emerges: the gradient magnitude |**∇**|**B**_total**|| is actually *suppressed* by an axial *B*₀ when evaluated in the radial direction through the strut. This occurs because the total field vector rotates toward the axial direction as *B*₀ increases, so the radial component of **∇**|**B**_total**| is reduced by the projection factor *B*_stent/*B*₀. At *B*₀ = 0.5 T this suppression is approximately 5-fold relative to the stent-only gradient.
 
-This result directly motivates the use of MRI-guided deployment as the primary operational mode: the substantial gradient amplification available at clinical field strengths brings the effective capture radius from sub-100 µm (at *B*₀ = 0) to over 380 µm (at *B*₀ = 1.5 T).
+However, the physically relevant quantity for cell capture is the force parameter FP = |**B**_total||**∇**|**B**_total**|| (Section 2.1), not the gradient alone. At *B*₀ = 0.5 T, |**B**_total| increases approximately 17-fold while |**∇**|**B**_total**|| decreases approximately 5-fold, giving a net ~3× gain in FP at 200 µm — and a much larger gain at greater distances where the stent field is weaker relative to *B*₀. This result motivates the use of MRI-guided deployment: the force-parameter gain at clinical field strengths substantially extends the effective capture range beyond what the stent-only gradient profile would suggest.
 
 ---
 
@@ -297,7 +297,7 @@ At the 40 T/m and 100 T/m thresholds — which bracket the physiologically relev
 
 The 12.2% discrepancy at 300 T/m is confined to the immediate strut surface vicinity (*r* ≈ 105 µm from the strut), where the uniform-magnetisation approximation of the Akoun and Yonnet kernel begins to diverge from the true nonlinear field distribution in a saturated soft-ferromagnet. Since this region lies well within the strut wall thickness and is not traversed by cells in the trajectory simulations, this near-surface inaccuracy does not affect the capture predictions. All conclusions in Sections 3–4 are based on gradient values in the range 40–100 T/m, where the validated analytical model is accurate to within 1%.
 
-The calibrated effective magnetisation values are *M*_eff = 0.619 MA/m at *B*₀ = 0 T and *M*_eff = 2.20 MA/m at *B*₀ = 1.5 T, corresponding to an external field amplification factor of 3.55× — consistent with the linear response expected from a soft ferromagnet at moderate relative permeability.
+The calibrated effective magnetisation is *M*_eff = 2.20 MA/m at *B*₀ = 1.5 T. This is the sole validated calibration point: a soft ferromagnet (µᵣ = 2) produces negligible gradient at *B*₀ = 0, so no meaningful COMSOL B₀ = 0 calibration was performed. All headline capture results use this calibrated value.
 
 ---
 
@@ -370,7 +370,7 @@ The following table consolidates the primary quantitative results from this work
 | Maximum VEGF concentration — 100× enhanced (320 cells) | 40 | ng/mL | Fig. 22 |
 | Therapeutic radius (5 ng/mL threshold, 100× enhanced) | ~730 | µm | Fig. 23 |
 | Time-to-threshold (5 ng/mL, 300 µm from cluster) | ~2.1 | hours | Fig. 24 |
-| External field gradient amplification (*B*₀ = 1.5 T vs 0 T) | 3.55× | — | Fig. 12 |
+| Force-parameter gain (*B*₀ = 0.5 T vs *B*₀ = 0, at 200 µm) | ~3× | — | Fig. 12 |
 
 **Central conclusion.** The trajectory integration analysis demonstrates that the Furlani and Ng (2006) static force-balance criterion consistently and substantially underestimates the effective capture range of SPION-labelled endothelial cells by a magnetisable stent across all physiologically realistic conditions. At the experimentally validated loading of 200 pg/cell (Polyak et al., 2008) and distal MCA flow velocity of 0.2 m/s, the trajectory model predicts an effective capture range of **142.5 µm** and near-wall capture efficiency of approximately 65–75%, compared to the static criterion's prediction of 39.0 µm — a 3.7× underestimate. The underestimation grows with decreasing SPION loading: at 50 pg/cell the extension factor reaches 14.2×, and at 10 pg/cell the static criterion incorrectly predicts zero capture while trajectory integration yields 51.4 µm. This result arises from the physics of advective radial drift: cells accumulate significant inward radial displacement during their axial transit through the gradient field upstream of the strut, before the instantaneous magnetic force exceeds the drag force at any single point along the path. The validated analytical field model (< 1% error at physiologically relevant gradients) and the Langevin saturation correction (13–24% reduction in capture metrics) both underpin the quantitative reliability of these predictions.
 

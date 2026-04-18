@@ -46,24 +46,14 @@ TH_COLORS: list[str] = ["#2ecc71", "#e74c3c", "#3498db"]
 # COMSOL calibration — V2-2C (12-cell)
 # ---------------------------------------------------------------------------
 # The code's radial-M permanent-magnet model approximates COMSOL's soft-
-# ferromagnet (μᵣ = 2) behaviour. Two calibration points are defined:
+# ferromagnet (μᵣ = 2) behaviour at B0 = 1.5 T (MRI-strength).
 #
-# (1) B0 = 0 (no external field):
-#     COMSOL's ferromagnet is unmagnetised at B0 = 0; the code uses an
-#     effective permanent M to match COMSOL's gradient profile shape.
-#     Calibration: M_eff = 0.619 MA/m matches COMSOL's 100 T/m crossing.
-#
-# (2) B0 = 1.5 T (MRI-strength, COMSOL's actual operating point):
-#     COMSOL's ferromagnet is strongly magnetised; the FEM solver computes
-#     the resulting concentrated-flux gradient profile. The code uses an
-#     effective permanent M to match COMSOL's threshold crossings exactly.
-#     Calibration: M_eff = 2.20 MA/m reproduces COMSOL's gradient profile
-#     with <1% error at 100 T/m and 40 T/m crossings.
-#
-# The ratio 2.20 / 0.619 ≈ 3.55 quantifies the amplification of the
-# gradient due to the B0 = 1.5 T external field in COMSOL's model.
+# At B0 = 1.5 T, COMSOL's ferromagnet is strongly magnetised; the FEM solver
+# computes the resulting concentrated-flux gradient profile. The effective
+# permanent magnetisation M_eff = 2.20 MA/m reproduces COMSOL's gradient
+# profile with <1% error at the 100 T/m and 40 T/m threshold crossings
+# (see fig25). This is the sole validated calibration point.
 
-M_COMSOL_EFF: float = 0.619e6   # A/m, calibrated at B0 = 0
 M_COMSOL_EFF_B15: float = 2.20e6   # A/m, calibrated at B0 = 1.5 T (MRI)
 
 # COMSOL V2-2C threshold crossing distances from stent surface (m)
@@ -101,22 +91,6 @@ def make_ring(B0_magnitude: float | None = None, **overrides) -> StentRing:
         if abs(B0_magnitude - 1.5) < 0.01:  # within 10 mT of 1.5 T
             p["M"] = M_COMSOL_EFF_B15
 
-    return StentRing(
-        p["n_struts"], p["R"], p["w"], p["t"], p["L"],
-        p["M"], p.get("mag_mode", "radial"),
-    )
-
-
-def make_ring_comsol(**overrides) -> StentRing:
-    """Return a StentRing with M calibrated to match COMSOL V2-2C at B0=0.
-
-    Uses M_COMSOL_EFF = 0.619 MA/m so the through-strut gradient profile aligns
-    with COMSOL's 100 T/m crossing at 0.240 mm from the stent surface.
-
-    Note: For B0 = 1.5 T (MRI), prefer make_ring(B0_magnitude=1.5) which
-    automatically uses M_COMSOL_EFF_B15.
-    """
-    p = {**DEFAULTS, "M": M_COMSOL_EFF, **overrides}
     return StentRing(
         p["n_struts"], p["R"], p["w"], p["t"], p["L"],
         p["M"], p.get("mag_mode", "radial"),

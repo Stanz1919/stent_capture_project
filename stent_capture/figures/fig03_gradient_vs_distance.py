@@ -1,27 +1,16 @@
 """
-Fig 3 — Gradient vs distance: code comparison with COMSOL reference.
+Fig 3 — Gradient vs distance: analytical profile with COMSOL reference.
 
 2-panel figure:
 
-(a) Log-scale through-strut gradient profile.
-    Blue  solid : code default (M = 1.0 MA/m, B0 = 0).
-    Orange solid: code calibrated (M = 0.619 MA/m, B0 = 0) — calibrated to
-                  match COMSOL's 100 T/m crossing at 240 um.
-    Coloured stars: COMSOL V2-2C reference threshold crossings
-                    (300 T/m @ 120 um, 100 T/m @ 240 um, 40 T/m @ 380 um).
+(a) Log-scale through-strut gradient profile (M = 1.0 MA/m, B0 = 0).
+    Coloured circles: COMSOL V2-2C threshold crossing distances
+                      (300 T/m @ 120 um, 100 T/m @ 240 um, 40 T/m @ 380 um)
+                      — from FEM at B0 = 1.5 T (MRI), shown for reference.
     Horizontal coloured lines: threshold levels.
 
-(b) Log-scale between-struts profile, same M comparison, no COMSOL overlay
-    (COMSOL reports through-strut values only).
-
-Physics note:
-  COMSOL models a soft ferromagnet (mu_r = 2) that concentrates B0 axially
-  inside the stent wall, producing dB_concentrated/dr with NO suppression.
-  The code models a permanently-magnetised ring (radial M) superposed with a
-  separate uniform B0.  At B0 = 0 both approaches produce a radial near-
-  surface gradient; calibrating M gives good agreement.  Adding B0 = 1.5 T
-  suppresses |nabla|B_total|| in the code (B_total rotates towards z), so the
-  two models diverge — this is documented in fig12 and fig13.
+(b) Log-scale between-struts profile (M = 1.0 MA/m, B0 = 0), no COMSOL
+    overlay (COMSOL reports through-strut values only).
 
 Run standalone::
 
@@ -33,11 +22,10 @@ import matplotlib.pyplot as plt
 
 from stent_capture.figures.common import (
     DEFAULTS, THRESHOLDS, OUT,
-    make_ring, make_ring_comsol,
-    M_COMSOL_EFF, COMSOL_CROSSINGS,
+    make_ring, COMSOL_CROSSINGS,
 )
 from stent_capture.figures.style import (
-    COLORS_CODE_DEFAULT, COLORS_CODE_CALIBRATED,
+    COLORS_CODE_DEFAULT,
     COLORS_THRESHOLD, COLORS_THRESHOLD_MEDIUM, COLORS_THRESHOLD_HIGH,
     COLORS_MARKER_REFERENCE
 )
@@ -52,21 +40,14 @@ def make_figure():
     z = np.zeros_like(d)
     d_um = d * 1e6
 
-    # Default M = 1.0 MA/m
+    # Default M = 1.0 MA/m, B0 = 0
     ring_def = make_ring()
     G_def_through = ring_def.grad_B(d + r_outer, np.zeros_like(d), z)
 
-    # Calibrated M = 0.619 MA/m (COMSOL-matched, B0 = 0)
-    ring_cal = make_ring_comsol()
-    G_cal_through = ring_cal.grad_B(d + r_outer, np.zeros_like(d), z)
-
-    # Between-struts profiles
+    # Between-struts profile
     angle_bet = np.pi / DEFAULTS["n_struts"]
     r_bet = d + r_outer
     G_def_between = ring_def.grad_B(
-        r_bet * np.cos(angle_bet), r_bet * np.sin(angle_bet), z
-    )
-    G_cal_between = ring_cal.grad_B(
         r_bet * np.cos(angle_bet), r_bet * np.sin(angle_bet), z
     )
 
@@ -83,9 +64,7 @@ def make_figure():
     # Panel (a): through-strut, log scale — COMSOL comparison
     # -----------------------------------------------------------------------
     ax_a.semilogy(d_um, G_def_through, color=COLORS_CODE_DEFAULT, lw=2.0,
-                  label=f"Code: M = 1.0 MA/m, B0 = 0")
-    ax_a.semilogy(d_um, G_cal_through, color=COLORS_CODE_CALIBRATED, lw=2.0,
-                  label=f"Code calibrated: M = {M_COMSOL_EFF/1e6:.3f} MA/m, B0 = 0")
+                  label="Analytical model: M = 1.0 MA/m, B0 = 0")
 
     # Horizontal threshold lines
     for lbl, val in THRESHOLDS.items():
@@ -114,10 +93,9 @@ def make_figure():
     # Explanatory annotation
     ax_a.text(
         0.03, 0.04,
-        "Circles = COMSOL V2-2C reference (FEM, mu_r=2, B0=1.5T)\n"
-        "Orange line = code calibrated to COMSOL 100 T/m crossing\n"
-        "Blue line = code default (M = 1.0 MA/m)\n"
-        "Both code curves use B0 = 0 (no external field suppression)",
+        "Circles = COMSOL V2-2C reference crossing distances\n"
+        "(FEM, mu_r=2, B0=1.5 T — shown for scale)\n"
+        "Analytical model uses B0 = 0, M = 1.0 MA/m",
         transform=ax_a.transAxes,
         ha="left", va="bottom", fontsize=7, color="#444444",
         bbox=dict(boxstyle="round,pad=0.35", fc="lightyellow", alpha=0.85),
@@ -127,11 +105,9 @@ def make_figure():
     # Panel (b): between-struts, log scale
     # -----------------------------------------------------------------------
     ax_b.semilogy(d_um, G_def_between, color=COLORS_CODE_DEFAULT, lw=2.0,
-                  label="Code: M = 1.0 MA/m, B0 = 0")
-    ax_b.semilogy(d_um, G_cal_between, color=COLORS_CODE_CALIBRATED, lw=2.0,
-                  label=f"Code calibrated: M = {M_COMSOL_EFF/1e6:.3f} MA/m, B0 = 0")
+                  label="Between-struts: M = 1.0 MA/m, B0 = 0")
     ax_b.semilogy(d_um, G_def_through, color=COLORS_CODE_DEFAULT, lw=1.0, alpha=0.25,
-                  label="Through-strut (M=1.0, ref.)")
+                  label="Through-strut (reference)")
 
     for lbl, val in THRESHOLDS.items():
         c = threshold_colors[lbl]
@@ -153,10 +129,9 @@ def make_figure():
     )
 
     fig.suptitle(
-        f"Gradient vs Distance from Stent Surface — Analytical 3-D Model vs COMSOL\n"
-        f"({DEFAULTS['n_struts']} struts / V2-2C, B0 = 0 for code curves; "
-        f"COMSOL: FEM, mu_r = 2, B0 = 1.5 T)\n"
-        f"Calibrated M = {M_COMSOL_EFF/1e6:.3f} MA/m matches COMSOL 100 T/m crossing exactly",
+        f"Gradient vs Distance from Stent Surface — Analytical 3-D Model\n"
+        f"({DEFAULTS['n_struts']} struts / V2-2C, M = 1.0 MA/m, B0 = 0)\n"
+        f"COMSOL reference circles from FEM at B0 = 1.5 T (shown for scale)",
         fontsize=11, y=0.98,
     )
     plt.tight_layout(pad=1.0)
