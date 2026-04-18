@@ -149,21 +149,21 @@ where *V*_SPION is the SPION volume corresponding to a given iron-oxide loading 
 
 $$F_{\text{drag}} = 6\pi \eta R_{\text{cell}} \, v_{\text{blood}}$$
 
-where *v*_blood is the local blood velocity from the Poiseuille profile with mean velocity $\bar{v}$ = 0.2 m/s in a vessel of radius *R* = 1.54 mm.
+where *v*_blood is the local blood velocity from the Poiseuille profile with mean velocity $\bar{v}$ = 0.2 m/s in a vessel of radius *R* = 1.54 mm. Unless otherwise stated, results in this section use a SPION loading of 200 pg/cell, matching the experimental dose reported by Polyak et al. (2008) — the primary in vivo benchmark for this work.
 
 ---
 
 ### 2.1 Force-Parameter Map with SPION Loading
 
-**Figure 13** reproduces the force-parameter map FP = |**B**||**∇**|**B**|| including explicit SPION loading dependence for both 10 pg/cell and 50 pg/cell loadings. Because the force parameter is independent of the SPION loading (it depends only on the field environment), the maps are identical in spatial structure; however, overlaying the drag-equivalent contour for each loading level illustrates how the effective capture zone — defined as the region where *F*_mag > *F*_drag — expands substantially with increasing loading. At 10 pg/cell, the capture zone is confined to within approximately 40 µm of the strut surface at the nominal flow velocity; at 50 pg/cell this expands to approximately 97 µm.
+**Figure 13** reproduces the force-parameter map FP = |**B**||**∇**|**B**|| including explicit SPION loading dependence for both 10 pg/cell and 200 pg/cell loadings. Because the force parameter is independent of the SPION loading (it depends only on the field environment), the maps are identical in spatial structure; however, overlaying the drag-equivalent contour for each loading level illustrates how the effective capture zone — defined as the region where *F*_mag > *F*_drag — expands substantially with increasing loading. At 10 pg/cell, the capture zone is confined to within approximately 40 µm of the strut surface at the nominal flow velocity; at 200 pg/cell this expands to approximately 142 µm, consistent with the static capture distance computed in Section 3.1.
 
 ---
 
 ### 2.2 Magnetic Force vs Radial Distance
 
-**Figure 14** presents the magnetic force *F*_mag as a function of radial distance from the strut surface for four SPION loadings spanning the experimentally reported range (10, 50, 100, and 200 pg/cell), evaluated at the strut mid-plane (*z* = 0). Forces are expressed in piconewtons (pN). At the nominal loading of 50 pg/cell, the magnetic force at 100 µm from the strut surface is approximately 1360 pN (Langevin model), decreasing to approximately 45 pN at 300 µm — a 30-fold reduction over 200 µm of radial distance that reflects the steep spatial decay of the field gradient.
+**Figure 14** presents the magnetic force *F*_mag as a function of radial distance from the strut surface for four SPION loadings spanning the experimentally reported range (10, 50, 100, and 200 pg/cell), evaluated at the strut mid-plane (*z* = 0). Forces are expressed in piconewtons (pN). At the Polyak-equivalent loading of 200 pg/cell, the magnetic force at 100 µm from the strut surface is approximately 5440 pN (Langevin model) — approximately 4× that of the 50 pg loading owing to the linear scaling of *V*_SPION with iron-oxide mass — decreasing steeply with radial distance as the gradient decays.
 
-For comparison, the Stokes drag force at the near-wall Poiseuille velocity (*v* ≈ 0.05 m/s at *r* = 1.40 mm, $\bar{v}$ = 0.2 m/s) is approximately 19 pN. The magnetic force exceeds drag by a factor of approximately 70 at 100 µm stand-off distance, declining to unity at approximately 97 µm for a 50 pg loading — the static capture distance. The loading dependence is linear, since *V*_SPION ∝ loading and χ_eff varies slowly with loading at moderate field strengths.
+For comparison, the Stokes drag force at the near-wall Poiseuille velocity (*v* ≈ 0.05 m/s at *r* = 1.40 mm, $\bar{v}$ = 0.2 m/s) is approximately 19 pN. The force–drag ratio declines with distance, reaching unity at the static capture distance of 39.0 µm for 200 pg loading. The loading dependence is linear to first order, since *V*_SPION ∝ loading, with a minor correction from Langevin saturation at the higher loadings (see Section 6).
 
 ---
 
@@ -177,9 +177,9 @@ The figure also illustrates the Poiseuille profile itself at the reference veloc
 
 ### 2.4 Static Capture Criterion Map
 
-**Figure 16** presents the binary spatial map of the static capture criterion: each point in the *r*–*z* plane is coloured according to whether the local magnetic force exceeds the local Stokes drag force. Results are shown for two representative SPION loadings (10 pg/cell and 50 pg/cell) at the nominal flow velocity $\bar{v}$ = 0.2 m/s.
+**Figure 16** presents the binary spatial map of the static capture criterion: each point in the *r*–*z* plane is coloured according to whether the local magnetic force exceeds the local Stokes drag force. Results are shown for two representative SPION loadings (10 pg/cell and 200 pg/cell) at the nominal flow velocity $\bar{v}$ = 0.2 m/s.
 
-For 10 pg/cell loading, the capture zone is a narrow crescent of approximately 18–28 µm depth immediately adjacent to the strut surface. For 50 pg/cell, the zone expands to approximately 60–97 µm. Critically, both maps show that the static criterion predicts *zero* capture for cells originating beyond the outermost captured position — a binary prediction that motivates the trajectory-based approach of Section 3, which demonstrates that significant capture can occur well beyond this static boundary via accumulated radial drift.
+For 10 pg/cell loading, the capture zone is a narrow crescent of approximately 18–28 µm depth immediately adjacent to the strut surface. For 200 pg/cell, matching the Polyak et al. (2008) experimental dose, the zone expands substantially to approximately 100–142 µm depth. Critically, both maps show that the static criterion predicts *zero* capture for cells originating beyond the outermost captured position — a binary prediction that motivates the trajectory-based approach of Section 3, which demonstrates that significant capture can occur well beyond this static boundary via accumulated radial drift.
 
 ---
 
@@ -195,17 +195,17 @@ This equation is integrated using a fourth-order Runge-Kutta solver (SciPy RK45)
 
 ### 3.1 SPION Loading Sweep — Static Capture Distance
 
-**Figure 17** plots the static capture distance as a function of SPION loading over the range 10–400 pg/cell at the nominal flow velocity. The static capture distance increases sub-linearly with loading, from approximately 6 µm at 10 pg/cell to approximately 140 µm at 400 pg/cell, saturating above approximately 200 pg due to the spatial extent of the near-field gradient region becoming the limiting factor rather than force magnitude. This figure provides the baseline against which trajectory results are benchmarked in Figure 21.
+**Figure 17** plots the static capture distance as a function of SPION loading over the range 10–1000 pg/cell at the nominal flow velocity, with velocity cases of 0.05, 0.2, 0.4, and 0.6 m/s. The static capture distance increases sub-linearly with loading, saturating above approximately 300 pg as the spatial extent of the near-field gradient region becomes the limiting factor. This figure provides the baseline against which trajectory results are benchmarked in Figure 21.
 
-The loading range 10–50 pg/cell represents current experimental benchmarks (Polyak et al., 2008; Cicha et al., 2010), while 200–400 pg/cell represents hypothetical future high-loading preparations. Even within the experimental range, the static capture distance (6–97 µm) is substantially smaller than the trajectory capture range (Section 3.5), underscoring the importance of the dynamic analysis.
+At 200 pg/cell — the Polyak et al. (2008) experimental loading — the static capture distance is 39.0 µm at $\bar{v}$ = 0.2 m/s, rising to 94.5 µm at $\bar{v}$ = 0.02 m/s and falling to 18.5 µm at $\bar{v}$ = 0.5 m/s. These static values are consistently and substantially lower than the corresponding trajectory predictions (Section 3.5), underscoring the importance of the dynamic analysis regardless of the flow regime.
 
 ---
 
 ### 3.2 Single-Cell Trajectory Visualisation
 
-**Figure 18** illustrates a representative single-cell trajectory in three dimensions for a 50 pg/cell cell injected at *r*₀ = 1.41 mm, the outermost position from which capture occurs at the nominal conditions ($\bar{v}$ = 0.2 m/s, *B*₀ = 0.5 T). The trajectory is colour-coded by instantaneous radial velocity magnitude.
+**Figure 18** illustrates a representative single-cell trajectory in three dimensions for a 200 pg/cell cell (Polyak et al., 2008 dose) injected at the outermost radial position from which capture occurs at the nominal conditions ($\bar{v}$ = 0.2 m/s, *B*₀ = 0.5 T). The trajectory is colour-coded by instantaneous radial velocity magnitude.
 
-The key feature of this figure is the two-stage character of the trajectory. During the first phase (upstream approach, *z* = −1.5 mm to *z* ≈ −200 µm), the cell drifts quasi-adiabatically inward at a rate proportional to the local force-parameter gradient, accumulating approximately 170 µm of inward radial displacement before entering the high-gradient near-field region. During the second phase (*z* > −200 µm), the rapid increase in gradient magnitude produces a strong inward acceleration culminating in strut contact. Without the first-phase accumulation, the cell would have passed beyond the capture zone — it is precisely this *ballistic* approach drift that the static criterion fails to account for.
+The key feature of this figure is the two-stage character of the trajectory. During the first phase (upstream approach, *z* = −1.5 mm to *z* ≈ −200 µm), the cell drifts quasi-adiabatically inward at a rate proportional to the local force-parameter gradient, accumulating significant inward radial displacement before entering the high-gradient near-field region. During the second phase (*z* > −200 µm), the rapid increase in gradient magnitude produces a strong inward acceleration culminating in strut contact. Without the first-phase accumulation, the cell would have passed beyond the static capture zone — it is precisely this *ballistic* approach drift that the static criterion fails to account for.
 
 ---
 
@@ -221,19 +221,19 @@ The figure illustrates the sharp transition between captured and escaping trajec
 
 **Figure 20** presents the two-dimensional capture efficiency *η*_cap as a joint function of mean flow velocity $\bar{v}$ (0.02–0.5 m/s) and SPION loading (10–300 pg/cell), computed over a sweep of 20 injected cells per parameter combination. The efficiency is expressed as a fraction of the total injected population.
 
-Several features of this heatmap merit discussion. First, capture efficiency decreases with increasing flow velocity at fixed loading, as expected, but the decrease is less steep than a naive linear drag argument would suggest: doubling the velocity from 0.1 to 0.2 m/s reduces efficiency from approximately 70% to 50% (at 50 pg), a factor of only 1.4 rather than 2. This sub-linear dependence arises because higher velocities also increase the axial transit time over the capture zone, partially compensating the increased drag. Second, the efficiency surface shows a notable plateau at high loadings (> 150 pg) and low velocities (< 0.1 m/s), where essentially all near-wall cells are captured regardless of further loading increase, suggesting a saturation of the capture mechanism limited by the geometric extent of the near-wall injection layer rather than by force.
+Several features of this heatmap merit discussion. First, capture efficiency decreases with increasing flow velocity at fixed loading, as expected, but the decrease is less steep than a naive linear drag argument would suggest: doubling the velocity from 0.1 to 0.2 m/s reduces efficiency from approximately 80% to 65% (at 200 pg), a factor of only 1.2 rather than 2. This sub-linear dependence arises because higher velocities also increase the axial transit time over the capture zone, partially compensating the increased drag. Second, the efficiency surface shows a notable plateau at high loadings (> 150 pg) and low velocities (< 0.1 m/s), where essentially all near-wall cells are captured regardless of further loading increase, suggesting a saturation of the capture mechanism limited by the geometric extent of the near-wall injection layer rather than by force. At the Polyak-equivalent conditions (200 pg, $\bar{v}$ = 0.2 m/s), near-wall capture efficiency reaches approximately 65–75%.
 
 ---
 
 ### 3.5 Static Criterion vs Trajectory Integration — Headline Comparison
 
-**Figure 21** is the central result of this thesis, directly comparing the capture predictions of the static force-balance criterion (Furlani and Ng, 2006) and the trajectory integration framework. It comprises two panels.
+**Figure 21** is the central result of this thesis, directly comparing the capture predictions of the static force-balance criterion (Furlani and Ng, 2006) and the trajectory integration framework at the Polyak et al. (2008) experimental loading of 200 pg/cell. It comprises two panels.
 
-**Panel (a)** shows the capture distance as a function of SPION loading (10–200 pg/cell) at the fixed nominal velocity $\bar{v}$ = 0.2 m/s. At 50 pg/cell loading, the static criterion predicts a capture distance of 6.8 µm, while trajectory integration yields 96.9 µm — an extension factor of **14.2×**. The discrepancy narrows at higher loadings as the static force exceeds drag over a larger region, but even at 200 pg/cell the trajectory capture range (approximately 190 µm) exceeds the static prediction by 3.7×.
+**Panel (a)** shows the capture distance as a function of SPION loading (10–400 pg/cell) at the fixed nominal velocity $\bar{v}$ = 0.2 m/s. At the benchmark loading of 200 pg/cell, the static criterion predicts a capture distance of 39.0 µm, while trajectory integration yields **142.5 µm** — an extension factor of **3.7×**. The discrepancy is more pronounced at lower loadings: at 50 pg/cell the extension factor reaches 14.2× (static: 6.8 µm; trajectory: 96.9 µm), while at 10 pg/cell the static criterion predicts zero capture yet trajectory integration still yields 51.4 µm. The extension factor diminishes at higher loadings as the static force dominates over a larger region, but a substantial trajectory advantage persists across the full experimentally relevant range.
 
-**Panel (b)** shows the capture distance as a function of mean flow velocity (0.02–0.5 m/s) at a fixed loading of 50 pg/cell. Remarkably, the static criterion predicts *zero* capture at $\bar{v}$ ≥ 0.2 m/s (at this loading), because the drag force at the near-wall Poiseuille velocity exceeds the maximum available magnetic force at all accessible radial positions. In stark contrast, trajectory integration predicts a capture range of **96.9 µm** at $\bar{v}$ = 0.2 m/s, declining to approximately **74 µm** at $\bar{v}$ = 0.5 m/s — well above zero at all simulated velocities.
+**Panel (b)** shows the capture distance as a function of mean flow velocity (0.02–0.5 m/s) at the fixed loading of 200 pg/cell. The static criterion predicts a declining but non-zero capture distance across all velocities — from 94.5 µm at $\bar{v}$ = 0.02 m/s to 18.5 µm at $\bar{v}$ = 0.5 m/s — whereas trajectory integration consistently predicts **2.7–5.8× greater capture distances**: from 256.5 µm at $\bar{v}$ = 0.02 m/s to **108.3 µm** at $\bar{v}$ = 0.5 m/s. Importantly, the extension factor *grows* with velocity (2.7× at 0.02 m/s to 5.8× at 0.5 m/s), because faster flow strengthens the relative contribution of sustained upstream radial drift to the total capture distance.
 
-This finding constitutes the primary quantitative conclusion of the dynamic analysis: **trajectory integration is not merely a refinement of the static criterion but an entirely different physical prediction at physiologically realistic conditions**. The static criterion, applied in isolation, would lead to the erroneous conclusion that SPION-labelled endothelial cell capture is unachievable at normal cerebral blood flow velocities with 50 pg loading, when in practice the trajectory analysis predicts nearly 50% near-wall capture efficiency (Figure 20). The discrepancy arises from the physics of advective drift: a cell traversing the 2 mm strut interaction zone accumulates approximately 170 µm of inward radial displacement even when no single point along the trajectory satisfies the static force-balance condition.
+This finding constitutes the primary quantitative conclusion of the dynamic analysis: **trajectory integration is not merely a refinement of the static criterion but a consistently more accurate and substantially larger prediction across all physiologically realistic conditions**. At the literature-matched loading of 200 pg/cell and MCA-representative velocity of 0.2 m/s, the trajectory model predicts an effective capture range of 142.5 µm and near-wall capture efficiency of approximately 65–75% (Figure 20), compared to the static criterion's prediction of 39.0 µm — a 3.7× underestimate. The discrepancy arises from the physics of advective radial drift: a cell traversing the 2 mm strut interaction zone accumulates significant inward radial displacement upstream of the high-gradient zone, well before the instantaneous magnetic force exceeds the drag force at any single point along its path.
 
 ---
 
@@ -287,7 +287,7 @@ Calibration was performed by fitting the effective analytical magnetisation *M*_
 
 **Figure 25** presents the core FEM validation in three panels, comparing the analytical model against COMSOL at three gradient threshold levels (300, 100, and 40 T/m) for the twelve-strut ring geometry at *B*₀ = 1.5 T.
 
-At the 40 T/m and 100 T/m thresholds — which correspond to the physiologically relevant capture zone for 50 pg and 200 pg loadings respectively — the analytical and COMSOL threshold crossing distances agree to within **0.4%** and **0.8%** respectively. Quantitatively:
+At the 40 T/m and 100 T/m thresholds — which bracket the physiologically relevant capture zone for the 200 pg/cell nominal loading — the analytical and COMSOL threshold crossing distances agree to within **0.4%** and **0.8%** respectively. Quantitatively:
 
 | Threshold | Analytical crossing (mm) | COMSOL crossing (mm) | Error |
 |-----------|--------------------------|----------------------|-------|
@@ -350,19 +350,21 @@ These results confirm that the diffusion-dominated approximation adopted in Sect
 
 ## 8. Summary of Key Quantitative Findings
 
-The following table consolidates the primary quantitative results from this work under the nominal operating conditions (12-strut ring geometry, *w* = 100 µm, *t* = 80 µm, *L* = 500 µm, *B*₀ = 0.5 T, *M*_eff = 2.20 MA/m, SPION loading 50 pg/cell, mean flow velocity 0.2 m/s, vessel radius 1.54 mm, blood viscosity 4 mPa·s, Langevin saturation model).
+The following table consolidates the primary quantitative results from this work under the nominal operating conditions (12-strut ring geometry, *w* = 100 µm, *t* = 80 µm, *L* = 500 µm, *B*₀ = 0.5 T, *M*_eff = 2.20 MA/m, SPION loading **200 pg/cell** (Polyak et al., 2008), mean flow velocity 0.2 m/s, vessel radius 1.54 mm, blood viscosity 4 mPa·s, Langevin saturation model).
 
 | Quantity | Value | Unit | Figure |
 |----------|-------|------|--------|
 | Peak gradient magnitude at *r* = 1.40 mm | ~490 | T/m | Fig. 7 |
-| Effective capture range — static criterion | 6.8 | µm | Fig. 21 |
-| Effective capture range — trajectory integration | 96.9 | µm | Fig. 21 |
-| Extension factor (trajectory/static) | **14.2×** | — | Fig. 21 |
-| Near-wall capture efficiency (20 cells, *r*₀ = 1.20–1.45 mm) | 45–50% | % | Fig. 20 |
+| Effective capture range — static criterion (200 pg, *v̄* = 0.2 m/s) | 39.0 | µm | Fig. 21 |
+| Effective capture range — trajectory integration (200 pg, *v̄* = 0.2 m/s) | 142.5 | µm | Fig. 21 |
+| Extension factor (trajectory/static), 200 pg, *v̄* = 0.2 m/s | **3.7×** | — | Fig. 21 |
+| Extension factor (trajectory/static), 50 pg, *v̄* = 0.2 m/s | 14.2× | — | Fig. 21 |
+| Trajectory capture range at *v̄* = 0.5 m/s (200 pg) | 108.3 | µm | Fig. 21 |
+| Near-wall capture efficiency (200 pg, *v̄* = 0.2 m/s) | 65–75% | % | Fig. 20 |
 | COMSOL validation error at 100 T/m | 0.8 | % | Fig. 25 |
 | COMSOL validation error at 40 T/m | 0.4 | % | Fig. 25 |
 | COMSOL validation error at 300 T/m | 12.2 | % | Fig. 25 |
-| Langevin saturation reduction in capture efficiency | 13–24 | % | Fig. Sat. |
+| Langevin saturation reduction in capture metrics | 13–24 | % | Fig. Sat. |
 | Diffusion length *L*_D = √(*D*/*k*) for VEGF | 734 | µm | Fig. 22 |
 | Maximum VEGF concentration — basal secretion (320 cells) | 0.08 | ng/mL | Fig. 22 |
 | Maximum VEGF concentration — 100× enhanced (320 cells) | 40 | ng/mL | Fig. 22 |
@@ -370,7 +372,7 @@ The following table consolidates the primary quantitative results from this work
 | Time-to-threshold (5 ng/mL, 300 µm from cluster) | ~2.1 | hours | Fig. 24 |
 | External field gradient amplification (*B*₀ = 1.5 T vs 0 T) | 3.55× | — | Fig. 12 |
 
-**Central conclusion.** The trajectory integration analysis demonstrates that the Furlani and Ng (2006) static force-balance criterion severely underestimates the effective capture range of SPION-labelled endothelial cells by a magnetisable stent at physiologically realistic cerebral blood flow conditions. At the clinically achievable SPION loading of 50 pg/cell and distal MCA flow velocity of 0.2 m/s, the trajectory model predicts an effective capture range of 96.9 µm and near-wall capture efficiency of approximately 45–50%, compared to the static criterion's prediction of 6.8 µm capture range and negligible efficiency — a discrepancy of 14.2×. This result arises from the physics of advective radial drift: cells accumulate significant inward radial displacement during their axial transit through the gradient field, even at positions where the instantaneous magnetic force does not exceed the drag force. The validated analytical field model (< 1% error at physiologically relevant gradients) and the Langevin saturation correction (13–24% reduction in capture metrics relative to the constant-susceptibility approximation) both strengthen the quantitative reliability of these predictions.
+**Central conclusion.** The trajectory integration analysis demonstrates that the Furlani and Ng (2006) static force-balance criterion consistently and substantially underestimates the effective capture range of SPION-labelled endothelial cells by a magnetisable stent across all physiologically realistic conditions. At the experimentally validated loading of 200 pg/cell (Polyak et al., 2008) and distal MCA flow velocity of 0.2 m/s, the trajectory model predicts an effective capture range of **142.5 µm** and near-wall capture efficiency of approximately 65–75%, compared to the static criterion's prediction of 39.0 µm — a 3.7× underestimate. The underestimation grows with decreasing SPION loading: at 50 pg/cell the extension factor reaches 14.2×, and at 10 pg/cell the static criterion incorrectly predicts zero capture while trajectory integration yields 51.4 µm. This result arises from the physics of advective radial drift: cells accumulate significant inward radial displacement during their axial transit through the gradient field upstream of the strut, before the instantaneous magnetic force exceeds the drag force at any single point along the path. The validated analytical field model (< 1% error at physiologically relevant gradients) and the Langevin saturation correction (13–24% reduction in capture metrics) both underpin the quantitative reliability of these predictions.
 
 ---
 
