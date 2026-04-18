@@ -57,14 +57,14 @@ SHEETS: dict[str, str] = {
     "V1":      "V1_6cell_cleaned",
     "V2":      "V2_12cell_cleaned",
     "V3":      "V3_18cell_cleaned",
-    "V5_new":  "V5_10cell_NEW_cleaned",
+    "V4_new":  "V5_10cell_NEW_cleaned",
     "2D_1T":   "2D_1T_cleaned",
     "2D_015T": "2D_015T_cleaned",
 }
 
 # Number of struts per loop (None for 2-D single-cell cases).
 N_STRUTS: dict[str, int | None] = {
-    "V1": 6, "V2": 12, "V3": 18, "V5_new": 10, "2D_1T": None, "2D_015T": None,
+    "V1": 6, "V2": 12, "V3": 18, "V4_new": 10, "2D_1T": None, "2D_015T": None,
 }
 
 # True applied field, correcting the mis-labelled sheets.
@@ -72,7 +72,7 @@ APPLIED_B_TRUE: dict[str, float] = {
     "V1":      1.5,
     "V2":      1.5,
     "V3":      1.5,
-    "V5_new":  1.5,
+    "V4_new":  1.5,
     "2D_1T":   1.5,
     "2D_015T": 0.2433,
 }
@@ -198,7 +198,7 @@ def _extract_fit_from_summary(wb) -> dict[str, dict]:
 
     # Columns: Dataset, Type, Cells/loop, Applied B, A, n, σ_A, σ_n, R², n_pts
     key_by_row = {
-        "V1": "V1", "V2": "V2", "V5": "V5_old", "V5 (new)": "V5_new",
+        "V1": "V1", "V2": "V2", "V5": "V4_old", "V5 (new)": "V4_new",
         "V3": "V3", "2D": "2D_1T",  # first "2D" row is the 1T one
     }
     seen_2d = False
@@ -251,8 +251,8 @@ def load_dataset(key: str) -> ComsolDataset:
     finally:
         wb.close()
 
-    # V5_new has fit range restricted to d < 0.17 mm; record that.
-    if key == "V5_new":
+    # V4_new has fit range restricted to d < 0.17 mm; record that.
+    if key == "V4_new":
         ds.fit_range_mm = (0.0, 0.17)
         ds.notes = "near-field fit only (d < 0.17 mm)"
     f = fits.get(key)
