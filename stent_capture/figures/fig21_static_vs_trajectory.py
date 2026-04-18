@@ -11,7 +11,7 @@ Both panels show two curves:
                 Found by 7-step bisection (resolution ~11 um).
 
 Panel (a) -- loading sweep : fixed v = 0.2 m/s (MCA mean, Aaslid 1982)
-Panel (b) -- velocity sweep: fixed 50 pg SPION loading
+Panel (b) -- velocity sweep: fixed loading set by _M_REF_PG (default 200 pg, Polyak 2008)
 
 Both metrics evaluated along strut-aligned axis (theta=0) for direct
 comparison with the static criterion (also evaluated at theta=0, z=0).
@@ -162,7 +162,7 @@ def make_figure():
     static_a, traj_a = _sweep_loading(ring, tf, _V_MCA)
     print(f"  Panel (a) done in {time.time()-t0:.1f} s", flush=True)
 
-    print("  Panel (b): velocity sweep at 50 pg ...", flush=True)
+    print(f"  Panel (b): velocity sweep at {_M_REF_PG:.0f} pg ...", flush=True)
     t0 = time.time()
     static_b, traj_b = _sweep_velocity(ring, tf, _M_REF_PG * 1e-15)
     print(f"  Panel (b) done in {time.time()-t0:.1f} s", flush=True)
@@ -287,7 +287,7 @@ def main():
         ratio = f"{tr/st:.1f}x" if st > 0.5 else "inf"
         print(f"  {m:>14.0f}  {st:>12.1f}  {tr:>12.1f}  {ratio:>8}")
 
-    print("\n  Panel (b) -- velocity sweep, 50 pg:")
+    print(f"\n  Panel (b) -- velocity sweep, {_M_REF_PG:.0f} pg:")
     print(f"  {'v_mean (m/s)':>14}  {'static (um)':>12}  {'traj (um)':>12}  {'ratio':>8}")
     for v, st, tr in zip(_VELOCITIES, static_b, traj_b):
         ratio = f"{tr/st:.1f}x" if st > 0.5 else "inf"
