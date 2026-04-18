@@ -1,7 +1,7 @@
 """
 paracrine
 =========
-VEGF paracrine signalling from captured endothelial cells on a magnetised
+VEGF paracrine signalling from captured MSCs on a magnetised
 stent.  Solves 2-D reaction–diffusion on the vessel-wall tissue plane and
 computes therapeutic-zone metrics.
 

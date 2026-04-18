@@ -12,7 +12,7 @@ Each panel:
 - White dashed circle: lumen inner boundary.
 
 Physical note: At cerebral arterial flow velocities (0.05-0.5 m/s, MCA-representative), the static
-force balance predicts no capture anywhere in the lumen for 10 pg SPION-
+force balance predicts no capture anywhere in the lumen for 200 pg SPION-
 loaded cells. This motivates the trajectory-based analysis in Stage 3.
 
 The field and gradient are computed once and shared across all three
@@ -21,7 +21,7 @@ velocity panels (only drag changes with velocity).
 Default parameters:
 - Stent: R=1.5mm, 12 struts (V2-2C), w=100um, t=80um, M=1MA/m, assume_saturation=True
 - B0: 0.5 T axial (+z)
-- Cell: 10 um, 10 pg, chi=2.0
+- Cell: 10 um, 200 pg, chi=2.0
 - Vessel: R_vessel=1.54mm, viscosity=4mPa·s
 
 Run standalone::
@@ -199,14 +199,14 @@ def make_figure():
 
     max_ratio_str = f"{max_ratio_overall:.2f}" if max_ratio_overall > 0 else "~0.52"
     fig.suptitle(
-        "Force ratio |F_mag|/|F_drag|,  B0 = 1.5 T axial (MRI-strength),  10 pg SPION-loaded cell\n"
+        "Force ratio |F_mag|/|F_drag|,  B0 = 1.5 T axial (MRI-strength),  200 pg SPION-loaded MSC\n"
         f"Green = |F_mag| > |F_drag| (capture),  Red = drag dominates,  "
         f"Max ratio  ~  {max_ratio_str} (near stent inner surface, v_mean = 0.05 m/s)\n"
         "Force ratio |F_mag|/|F_drag| under static force balance. Ratios below unity (red)\n"
         "indicate drag exceeds magnetic force; ratios above unity (green) indicate capture.\n"
         "At cerebral arterial flow velocities (0.05-0.5 m/s, MCA-representative;\n"
         "Aaslid et al. 1982), the ratio remains below 1.0 throughout the lumen\n"
-        "for a 10 pg SPION-loaded cell, demonstrating that the static Furlani & Ng\n"
+        "for a 200 pg SPION-loaded MSC, demonstrating that the static Furlani & Ng\n"
         "criterion is insufficient to explain experimental capture at realistic flow\n"
         "conditions. This motivates the trajectory-based analysis in Stage 3, where\n"
         "cells accumulate radial drift over their transit time even when instantaneous\n"

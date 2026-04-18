@@ -1,7 +1,7 @@
 """
 physics.magnetic_force
 ======================
-Magnetic force on a SPION-labelled endothelial cell in an external field.
+Magnetic force on a SPION-labelled MSC in an external field.
 
 The force on a superparamagnetic particle is derived from the energy of a
 magnetic dipole in a non-uniform field (Furlani & Ng 2006, Eq. 2):
@@ -38,7 +38,7 @@ Avilés, M.O. et al. (2007). Theoretical analysis of a transdermal
     ferromagnetic implant for retention of magnetic drug carrier particles.
     Journal of Magnetism and Magnetic Materials, 310, 428-443.
 Polyak, B. et al. (2008). High field gradient targeting of magnetic
-    nanoparticle-loaded endothelial cells to the surfaces of steel stents.
+    nanoparticle-loaded cells to the surfaces of steel stents.
     PNAS, 105(2), 698-703.
 Chorny, M. et al. (2007). Targeting stents with locally delivered paclitaxel-
     loaded magnetic nanoparticles prevents neointima formation in porcine
@@ -57,15 +57,15 @@ MU_0 = 4 * pi * 1e-7  # T·m/A
 
 class SPIONLabelledCell:
     """
-    Model of an endothelial cell loaded with superparamagnetic iron oxide
+    Model of a human bone marrow MSC loaded with superparamagnetic iron oxide
     nanoparticles (SPIONs).
 
-    Default values are representative of bovine aortic endothelial cells
-    (BAECs) loaded with biodegradable polymeric SPIONs following the protocol
-    of Polyak et al. 2008 / Chorny et al. 2007:
+    Default values are representative of human BM-MSCs loaded with
+    biodegradable polymeric SPIONs at the dose used by Polyak et al. (2008):
 
-    - Cell radius 10 µm (typical EC in culture / vessel wall)
-    - SPION load 10 pg iron oxide per cell (lower loading; Polyak et al. 2008 stent study used 200 pg)
+    - Cell radius 10 µm (upper end of 10–20 µm suspended human BM-MSC
+      diameter range; Dominici et al. 2006 Cytotherapy — conservative for drag)
+    - SPION load 200 pg iron oxide per cell (Polyak et al. 2008 stent study)
     - chi_spion = 2.0 (SI volume susceptibility of magnetite SPIONs in the
       field regime 0.1–1 T; appropriate for partially saturated nanoparticles
       with M ~ chi * B/mu_0 — see Furlani & Ng 2006 Table 1)
@@ -84,7 +84,7 @@ class SPIONLabelledCell:
     radius : float
         Cell radius (m).  Default 10 µm.
     spion_mass_per_cell : float
-        Total mass of SPION material per cell (kg).  Default 10e-15 kg (10 pg).
+        Total mass of SPION material per cell (kg).  Default 200e-15 kg (200 pg).
     spion_susceptibility : float
         SI volume susceptibility of the SPION material (dimensionless).
         Default 2.0.
@@ -99,7 +99,7 @@ class SPIONLabelledCell:
     def __init__(
         self,
         radius: float = 10e-6,
-        spion_mass_per_cell: float = 50e-15,   # kg — 50 pg of iron oxide (Polyak benchmark)
+        spion_mass_per_cell: float = 200e-15,   # kg — 200 pg of iron oxide (Polyak et al. 2008)
         spion_susceptibility: float = 2.0,
         spion_density: float = 5170,
         spion_sat_magnetization: float | None = 446e3,  # A/m for Langevin model

@@ -4,7 +4,7 @@ fig22 — Steady-state VEGF concentration field
 Side-by-side comparison: basal secretion (left) vs VEGF-enhanced cells (right,
 100x secretion — modelling transfected ECs as in Chorny 2007 / Polyak 2008).
 
-Demonstrates that basal EC secretion (Stefanini 2008) is insufficient for
+Demonstrates that basal MSC secretion is insufficient for
 therapeutic VEGF levels with ~320 captured cells, but VEGF-enhanced cells
 reach the 5 ng/mL therapeutic threshold (Ozawa 2004).
 """

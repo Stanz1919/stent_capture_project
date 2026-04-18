@@ -1,7 +1,7 @@
 """
 simulation.trajectories
 =======================
-Single-cell trajectory integration for SPION-labelled endothelial cells
+Single-cell trajectory integration for SPION-labelled MSCs
 flowing through a magnetised stent under an applied field.
 
 Physics

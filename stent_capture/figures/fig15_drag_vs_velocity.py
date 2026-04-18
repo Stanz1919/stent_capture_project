@@ -183,7 +183,7 @@ def make_figure():
     ax_d.set_ylim(0)
 
     fig.suptitle(
-        "Hydrodynamic drag on a 10 um endothelial cell in Poiseuille blood flow\n"
+        "Hydrodynamic drag on a 10 um MSC in Poiseuille blood flow\n"
         "(vessel R = 1.54 mm, viscosity = 4 mPa·s, density = 1060 kg/m³ — "
         "cerebral arterial / MCA-representative; Aaslid et al. 1982)\n"
         "Stent inner surface at r = R - t/2 = 1.46 mm",

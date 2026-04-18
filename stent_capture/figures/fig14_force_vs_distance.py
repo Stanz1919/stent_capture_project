@@ -10,7 +10,7 @@ Fig 14 — Magnetic force on SPION-labelled cell vs distance from stent.
     B0 = 0 reference overlaid as dashed.
 (d) |F_mag| at 200 um vs SPION load (1-100 pg), three B0 values.
 
-Default cell: 10 um radius, 10 pg iron oxide, chi = 2.0.
+Default cell: 10 um radius, 200 pg iron oxide, chi = 2.0.
 Default stent: R=1.5mm, 8 struts, 100x80 um, M=1 MA/m, assume_saturation=True.
 
 Run standalone::
@@ -44,7 +44,7 @@ _COLORS = [
     COLORS_THRESHOLD_HIGH,        # 1.0 T - strong field (red)
     COLORS_MARKER_REFERENCE,      # 1.5 T - MRI reference (gray)
 ]
-_CELL     = SPIONLabelledCell()       # default: 10 um, 10 pg, chi=2.0
+_CELL     = SPIONLabelledCell()       # default: 10 um, 200 pg, chi=2.0
 
 
 def _make_tf(B0_z: float = 0.0, B0_x: float = 0.0) -> TotalField:
@@ -153,7 +153,7 @@ def make_figure():
     for (B0, col) in zip([0.0, 0.5, 1.0, 1.5], mass_colors):
         lbl = f"B0 = {B0:.1f} T" + (" (MRI)" if B0 == 1.5 else "")
         ax_d.loglog(mass_pg, fp_mass[B0], color=col, lw=2, label=lbl)
-    ax_d.axvline(10, color=COLORS_MARKER_REFERENCE, ls=":", lw=1.2, label="Default (10 pg)")
+    ax_d.axvline(10, color=COLORS_MARKER_REFERENCE, ls=":", lw=1.2, label="Default (200 pg)")
     ax_d.set_xlabel("SPION load (pg iron oxide per cell)")
     ax_d.set_ylabel("|F_mag| at 200 um (pN)")
     ax_d.set_title("(d) Force vs SPION load (at 200 um, axial B0)")
@@ -162,7 +162,7 @@ def make_figure():
 
     fig.suptitle(
         "Magnetic force on SPION-labelled cell near magnetised stent\n"
-        "(cell: 10 um, 10 pg iron oxide, chi = 2.0; "
+        "(cell: 10 um, 200 pg iron oxide, chi = 2.0; "
         "stent: 12 struts / V2-2C, R = 1.5 mm, M = 1.0 MA/m, assume_saturation = True)",
         fontsize=11, y=0.98,
     )
