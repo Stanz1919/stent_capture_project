@@ -49,17 +49,18 @@ from stent_capture.core.gradient import compute_gradient_vector
 
 _B0_Z    = 1.5               # T, axial — MRI-strength, matches COMSOL
 _R_VES   = 1.54e-3           # m, vessel radius
-_V_CASES = [0.05, 0.2, 0.5]  # m/s
-# Unified color palette: blue (low), orange (medium), red (high)
+_V_CASES = [0.05, 0.2, 0.4, 0.6]  # m/s  (0.6 = healthy MCA, Aaslid et al. 1982)
+# Unified color palette: blue (low), orange (medium), red (high), purple (healthy MCA)
 _COLORS  = [
     COLORS_CODE_DEFAULT,      # 0.05 m/s - low velocity (blue)
     COLORS_CODE_CALIBRATED,   # 0.2 m/s - medium velocity (dark orange)
-    COLORS_THRESHOLD_HIGH,    # 0.5 m/s - high velocity (red)
+    COLORS_THRESHOLD_HIGH,    # 0.4 m/s - high velocity (red)
+    "#8e44ad",                # 0.6 m/s - healthy MCA (purple)
 ]
 _CELL    = SPIONLabelledCell()   # default (10 pg); used only for drag
 
-# Loading sweep: 1-300 pg, 45 points log-spaced
-_LOADINGS_PG = np.logspace(0, np.log10(300), 45)
+# Loading sweep: 1-1000 pg, 50 points log-spaced
+_LOADINGS_PG = np.logspace(0, 3, 50)
 _LOADINGS_KG = _LOADINGS_PG * 1e-15
 
 # Reference loadings for the 3x3 table and annotations
@@ -177,7 +178,8 @@ def make_figure():
     # -----------------------------------------------------------------------
     bench_kg = [m * 1e-15 for m in _BENCH_PG]
     print("\n    Capture distance table (um from stent inner surface):")
-    print(f"    {'Loading':>12}  {'v=0.05 m/s':>12}  {'v=0.20 m/s':>12}  {'v=0.50 m/s':>12}")
+    header = f"    {'Loading':>12}  " + "  ".join(f"v={v:.2f} m/s{''!s:>4}" for v in _V_CASES)
+    print(header)
     table_data: dict[int, dict[float, float]] = {}
     for m_pg, m_kg in zip(_BENCH_PG, bench_kg):
         row: dict[float, float] = {}
@@ -203,7 +205,7 @@ def make_figure():
             m_thresh = _LOADINGS_PG[indices[0]]
             print(f"      v = {v:.2f} m/s : {m_thresh:.1f} pg")
         else:
-            print(f"      v = {v:.2f} m/s : > 300 pg (not reached in sweep)")
+            print(f"      v = {v:.2f} m/s : > 1000 pg (not reached in sweep)")
 
     # -----------------------------------------------------------------------
     # Plot
@@ -220,11 +222,14 @@ def make_figure():
     ax_a.axvspan(30, 100, alpha=0.10, color=COLORS_THRESHOLD,
                  label="Typical experimental\nrange (30-100 pg)")
 
-    # Horizontal reference lines
-    ax_a.axhline(inter_strut_half, color=COLORS_MARKER_REFERENCE, ls="--", lw=1.5,
-                 label=f"Inter-strut half-distance ({inter_strut_half:.0f} um)")
-    ax_a.axhline(lumen_radius_um, color=COLORS_MARKER_REFERENCE, ls="--", lw=1.2,
-                 label=f"Lumen inner radius ({lumen_radius_um:.0f} um)")
+    # Inter-strut half-distance annotated as text (589 um exceeds capture range at all loadings tested)
+    ax_a.annotate(
+        f"Inter-strut half-distance: {inter_strut_half:.0f} µm",
+        xy=(1, 1), xycoords="axes fraction",
+        xytext=(-5, -5), textcoords="offset points",
+        ha="right", va="top", fontsize=8,
+        color=COLORS_MARKER_REFERENCE,
+    )
 
     # Vertical reference lines (literature benchmarks)
     bench_styles = [":", ":", ":"]
@@ -239,8 +244,8 @@ def make_figure():
         "(a) Capture distance vs SPION loading\n"
         "(B0 = 1.5 T axial (MRI), inward radial sweep)"
     )
-    ax_a.set_xlim(1, 300)
-    ax_a.set_ylim(0, 1550)
+    ax_a.set_xlim(1, 1000)
+    ax_a.set_ylim(bottom=0)
     ax_a.legend(fontsize=7, loc="upper left")
     ax_a.grid(True, which="both", alpha=0.3)
 
@@ -262,7 +267,7 @@ def make_figure():
         "(b) Force ratio at 5 um from stent inner surface\n"
         "(B0 = 1.5 T axial (MRI); ratio > 1 = capture)"
     )
-    ax_b.set_xlim(1, 300)
+    ax_b.set_xlim(1, 1000)
     ax_b.set_ylim(1e-3, 1e2)
     ax_b.legend(fontsize=7, loc="upper left")
     ax_b.grid(True, which="both", alpha=0.3)
@@ -271,7 +276,7 @@ def make_figure():
         "SPION loading parameter sweep  —  B0 = 1.5 T axial (MRI), 12-strut stent (V2-2C), R = 1.5 mm\n"
         "Static Furlani & Ng criterion: |F_mag| > |F_drag|  (Stage 3 will extend to trajectories)\n"
         "Cell: 10 um radius, χ = 2.0, magnetite (5170 kg/m³);  vessel R = 1.54 mm, η = 4 mPa·s\n"
-        "Cerebral arterial / MCA-representative flow (Aaslid et al. 1982)",
+        "v = 0.6 m/s: healthy MCA mean (Aaslid et al. 1982);  v = 0.2 m/s: distal/diseased vessel",
         fontsize=10, y=0.98,
     )
     plt.tight_layout(pad=1.0)
