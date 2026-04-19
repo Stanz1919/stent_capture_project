@@ -262,6 +262,44 @@ def make_figure(y_min: float | None = None, x_min: float | None = None):
     return fig, v1_excel, v2, v3, v5_new, d_common, g15, g024, ratio, mean_ratio
 
 
+def make_linearity_figure():
+    """Standalone 2-D linearity check: G[1.5 T] / G[0.2433 T] vs distance."""
+    d2_15  = load_dataset("2D_1T")
+    d2_024 = load_dataset("2D_015T")
+
+    d_common, idx_15, idx_024 = np.intersect1d(
+        np.round(d2_15.d_mm, 6), np.round(d2_024.d_mm, 6),
+        return_indices=True,
+    )
+    ratio      = d2_15.grad_T_per_m[idx_15] / d2_024.grad_T_per_m[idx_024]
+    mean_ratio = float(np.mean(ratio))
+    expected   = 1.5 / 0.2433
+
+    fig, ax = plt.subplots(figsize=(7, 5))
+
+    ax.semilogx(d_common * 1e3, ratio, "o", ms=5.5, color="#8e44ad",
+                mec="black", mew=0.4, label="COMSOL ratio", zorder=3)
+    ax.axhline(expected, color="#2980b9", ls="--", lw=2,
+               label=f"Expected (1.5 / 0.2433) = {expected:.4f}", zorder=2)
+    ax.axhline(mean_ratio, color="#e67e22", ls=":", lw=1.8,
+               label=f"Observed mean = {mean_ratio:.4f}", zorder=2)
+
+    ax.set_xlabel(r"Arc length from strut surface $d$ ($\mu$m)",
+                  fontsize=11, fontweight="bold")
+    ax.set_ylabel(r"$G(d)|_{1.5\,\mathrm{T}}\;/\;G(d)|_{0.2433\,\mathrm{T}}$",
+                  fontsize=11, fontweight="bold")
+    ax.set_title(
+        r"2-D linearity check: gradient ratio vs distance ($\mu_r = 2$)",
+        fontsize=11, fontweight="bold",
+    )
+    ax.set_ylim(5.5, 7.0)
+    ax.legend(fontsize=9, loc="upper right")
+    ax.grid(True, which="both", alpha=0.3, ls="--")
+
+    plt.tight_layout()
+    return fig
+
+
 def main():
     print("  Fig 25: COMSOL multi-geometry gradient profiles...")
     (fig, v1_excel, v2, v3, v5_new,
@@ -287,6 +325,12 @@ def main():
     labels        = ["V1", "V2", "V3", "V4"]
     _export_powerlawfit(geom_datasets, labels)
     _export_linearity(d_common, g15, g024, ratio, mean_ratio)
+
+    fig3 = make_linearity_figure()
+    fig3.savefig(OUT / "fig25_linearity_check.png", dpi=150, bbox_inches="tight")
+    fig3.savefig(OUT / "fig25_linearity_check.pdf", bbox_inches="tight")
+    plt.close(fig3)
+    print("  [OK] fig25_linearity_check saved")
 
 
 if __name__ == "__main__":

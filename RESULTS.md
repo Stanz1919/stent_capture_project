@@ -31,8 +31,8 @@
    - 4.2 [Concentration vs Radial Distance](#42-concentration-vs-radial-distance)
    - 4.3 [Transient Time-to-Threshold](#43-transient-time-to-threshold)
 5. [FEM Validation Against COMSOL](#5-fem-validation-against-comsol)
-   - 5.1 [Gradient Threshold Crossings — COMSOL Comparison](#51-gradient-threshold-crossings--comsol-comparison)
-   - 5.2 [Multi-Geometry Sensitivity Comparison](#52-multi-geometry-sensitivity-comparison)
+   - 5.1 [Gradient Profile and Threshold Crossings — COMSOL Comparison](#51-gradient-profile-and-threshold-crossings--comsol-comparison)
+   - 5.2 [Multi-Geometry Sensitivity Comparison — V-Series](#52-multi-geometry-sensitivity-comparison)
 6. [Langevin Saturation Model — Supplementary Analysis](#6-langevin-saturation-model--supplementary-analysis)
    - 6.1 [Saturation Impact on Force and Capture Predictions](#61-saturation-impact-on-force-and-capture-predictions)
 7. [Advection Sensitivity — Supplementary Analysis](#7-advection-sensitivity--supplementary-analysis)
@@ -296,11 +296,11 @@ Calibration was performed by fitting the effective analytical magnetisation *M*_
 
 ---
 
-### 5.1 Gradient Threshold Crossings — COMSOL Comparison
+### 5.1 Gradient Profile and Threshold Crossings — COMSOL Comparison
 
-**Figure 25** presents the core FEM validation in three panels, comparing the analytical model against COMSOL at three gradient threshold levels (300, 100, and 40 T/m) for the twelve-strut ring geometry at *B*₀ = 1.5 T.
+**Figure 4b** presents the gradient profile comparison, plotting the analytical code prediction and COMSOL V2 FEM data points on log-log axes over the range 25–400 µm from the strut surface at *B*₀ = 1.5 T. The analytical curve closely tracks the COMSOL scatter across the full plotted range, confirming that the Akoun and Yonnet model with *M*_eff = 2.20 MA/m captures the correct spatial decay behaviour.
 
-At the 40 T/m and 100 T/m thresholds — which bracket the physiologically relevant capture zone for the 200 pg/cell nominal loading — the analytical and COMSOL threshold crossing distances agree to within **0.4%** and **0.8%** respectively. Quantitatively:
+**Figure 4** quantifies the agreement at the three capture-relevant threshold levels via a bar chart of threshold crossing distances. At the 40 T/m and 100 T/m thresholds — which bracket the physiologically relevant capture zone for the 200 pg/cell nominal loading — the analytical and COMSOL threshold crossing distances agree to within **0.4%** and **0.8%** respectively. Quantitatively:
 
 | Threshold | Analytical crossing (mm) | COMSOL crossing (mm) | Error |
 |-----------|--------------------------|----------------------|-------|
@@ -312,13 +312,17 @@ The 12.2% discrepancy at 300 T/m is confined to the immediate strut surface vici
 
 The calibrated effective magnetisation is *M*_eff = 2.20 MA/m at *B*₀ = 1.5 T. This is the sole validated calibration point: a soft ferromagnet (µᵣ = 2) produces negligible gradient at *B*₀ = 0, so no meaningful COMSOL B₀ = 0 calibration was performed. All headline capture results use this calibrated value.
 
+**Figure 25 (linearity check)** provides independent confirmation that the calibration is field-strength independent. The ratio *G*(*d*)|₁.₅ T / *G*(*d*)|₀.₂₄₃₃ T is plotted across all available COMSOL cut-line nodes. The ratio is constant at 6.177 ± 0.001 across the full depth range (33–640 µm), matching the expected field ratio 1.5/0.2433 = 6.165 to within 0.2%. The flat profile across two decades in distance confirms that the COMSOL µᵣ = 2 stent material remains in its linear magnetic regime throughout the capture zone, and that the calibration is independent of the SPION susceptibility model (which enters only through the force calculation, not the field computation).
+
 ---
 
 ### 5.2 Multi-Geometry Sensitivity Comparison
 
-**Figure 26** extends the COMSOL validation to four non-nominal geometries, comparing analytical and COMSOL predictions of the 100 T/m threshold crossing distance for perturbations in *n* (strut count), *w* (strut width), *t* (strut thickness), and *L* (strut length). The results are presented as a 2×2 panel.
+**Figure 25** (V-series gradient profiles) extends the COMSOL validation to three additional stent geometries spanning a range of strut counts per loop: V1 (*N* = 6), V2 (*N* = 12, the calibration geometry), V3 (*N* = 18), and V4 (*N* = 10). COMSOL cut-line data are plotted as scatter points against the analytical Akoun and Yonnet curves for each geometry, all using the same calibrated *M*_eff = 2.20 MA/m.
 
-Across all four geometry variations, the analytical model reproduces the COMSOL threshold crossing distances with a maximum error of 4.2% (in the *t*-sweep at the largest thickness), with a median error of approximately 1.6%. These results confirm that the calibrated Akoun and Yonnet model is not overfitted to a single geometry but generalises accurately across the design space relevant to stent optimisation studies (Figure 5, Figure 6). The multi-geometry agreement provides additional confidence in using the analytical model for parametric sweeps, where FEM re-computation at each design point would be computationally prohibitive.
+The key finding is that V1 (*N* = 6) sits at consistently lower gradient amplitude than V2/V3/V4 across all depths from 25 to 200 µm. This reflects a reduced total magnetic moment from fewer struts rather than a different decay rate: the analytical curves for all four geometries share a similar power-law exponent, with amplitude scaling approximately with *N*. The analytical model over-predicts the V1 COMSOL data (the analytical curve sits above the V1 scatter), which is expected — the single *M*_eff was calibrated exclusively to V2, and the geometric field-concentration effect of fewer struts is not captured by a uniform magnetisation rescaling. V4 (*N* = 10) data are shown in the near-field only (*d* < 170 µm) due to the limited extent of the COMSOL cut-line export for that geometry. A dashed boundary at *d* = 200 µm delineates the semi-reliable depth range for all datasets.
+
+Power-law fit coefficients (*A*, *n*, *R*²) for all four geometries are tabulated in `results/fig25_powerlawfit_summary.csv`.
 
 ---
 
@@ -374,9 +378,9 @@ The following table consolidates the primary quantitative results from this work
 | Extension factor (trajectory/static), 50 pg, *v̄* = 0.2 m/s | ∞ (static = 0) | — | Fig. 21 |
 | Trajectory capture range at *v̄* = 0.5 m/s (200 pg) | 108.3 | µm | Fig. 21 |
 | Near-wall capture efficiency (200 pg, *v̄* = 0.2 m/s) | 65–75% | % | Fig. 20 |
-| COMSOL validation error at 100 T/m | 0.8 | % | Fig. 25 |
-| COMSOL validation error at 40 T/m | 0.4 | % | Fig. 25 |
-| COMSOL validation error at 300 T/m | 12.2 | % | Fig. 25 |
+| COMSOL validation error at 100 T/m | 0.8 | % | Fig. 4/4b |
+| COMSOL validation error at 40 T/m | 0.4 | % | Fig. 4/4b |
+| COMSOL validation error at 300 T/m | 12.2 | % | Fig. 4/4b |
 | Langevin saturation reduction in capture metrics | 13–24 | % | Fig. Sat. |
 | Diffusion length *L*_D = √(*D*/*k*) for VEGF | 734 | µm | Fig. 22 |
 | Maximum VEGF concentration — normoxic MSC basal (480 cells) | 10.2 | ng/mL | Fig. 22 |
