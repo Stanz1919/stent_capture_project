@@ -105,44 +105,14 @@ def make_figure():
             error_pct[lbl] = np.nan
 
     # -----------------------------------------------------------------------
-    # Layout: 1 row x 3 columns
+    # Single panel — bar chart of threshold crossings (panel b only)
     # -----------------------------------------------------------------------
-    fig = plt.figure(figsize=(18, 6))
-    ax_profile = fig.add_subplot(1, 3, 1)
-    ax_chart = fig.add_subplot(1, 3, 2)
-    ax_table = fig.add_subplot(1, 3, 3)
+    fig, ax_chart = plt.subplots(figsize=(7, 5))
 
-    # -----------------------------------------------------------------------
-    # Panel (a) — full gradient profile overlay
-    # -----------------------------------------------------------------------
-    ax_profile.loglog(d_code_m * 1e3, G_code, color="#2980b9", lw=2.2,
-                      label="Code (M=2.20 MA/m)", zorder=3)
-    ax_profile.loglog(d_v2_mm, G_v2, "o", ms=5.5, color="#e67e22",
-                      mec="black", mew=0.5,
-                      label=f"COMSOL V2 (n={len(d_v2_mm)} pts)", zorder=4)
-    ax_profile.loglog(fit_d, G_fit, "--", color="#c0392b", lw=1.4, alpha=0.85,
-                      label=f"Fit: {v2.fit_A:.2f}·d^({v2.fit_n:.2f})", zorder=2)
-
-    for (lbl, val), c in zip(THRESHOLDS.items(), TH_COLORS):
-        ax_profile.axhline(val, color=c, ls=":", lw=1.3, alpha=0.7)
-        ax_profile.text(1.1, val, lbl, color=c, fontsize=8, va="center",
-                        bbox=dict(facecolor="white", edgecolor="none", alpha=0.7, pad=0.8))
-
-    ax_profile.set_xlabel("Distance from strut surface $d$ (mm)", fontsize=11, fontweight="bold")
-    ax_profile.set_ylabel(r"$|\nabla|B||$ (T/m)", fontsize=11, fontweight="bold")
-    ax_profile.set_title("(a) Gradient profile: code vs COMSOL (B₀=1.5 T)",
-                         fontsize=11, fontweight="bold")
-    ax_profile.set_xlim(d_code_m.min() * 1e3, d_code_m.max() * 1e3)
-    ax_profile.grid(True, which="both", alpha=0.3, ls="--")
-    ax_profile.legend(fontsize=9, loc="lower left")
-
-    # -----------------------------------------------------------------------
-    # Panel (b) — bar chart of threshold crossings
-    # -----------------------------------------------------------------------
     thresholds_list = list(THRESHOLDS.keys())
     x_pos = np.arange(len(thresholds_list))
     bw = 0.35
-    code_vals = [code_crossings[l] for l in thresholds_list]
+    code_vals   = [code_crossings[l]   for l in thresholds_list]
     comsol_vals = [comsol_crossings[l] for l in thresholds_list]
 
     bars1 = ax_chart.bar(x_pos - bw / 2, code_vals, bw,
@@ -159,74 +129,57 @@ def make_figure():
                           fontsize=8, color=colr, fontweight="bold")
 
     ax_chart.set_xlabel("Gradient threshold", fontsize=11, fontweight="bold")
-    ax_chart.set_ylabel("Distance from stent surface (um)", fontsize=11, fontweight="bold")
-    ax_chart.set_title("(b) Threshold-crossing distances", fontsize=11, fontweight="bold")
+    ax_chart.set_ylabel(r"Distance from stent surface ($\mu$m)",
+                        fontsize=11, fontweight="bold")
+    ax_chart.set_title("Threshold-crossing distances: code vs COMSOL (B₀ = 1.5 T)",
+                       fontsize=11, fontweight="bold")
     ax_chart.set_xticks(x_pos)
     ax_chart.set_xticklabels(thresholds_list, fontsize=10)
     ax_chart.set_ylim(0, max(max(code_vals), max(comsol_vals)) * 1.18)
     ax_chart.legend(fontsize=9, loc="upper right")
     ax_chart.grid(True, axis="y", alpha=0.3, ls="--")
 
-    # -----------------------------------------------------------------------
-    # Panel (c) — data table
-    # -----------------------------------------------------------------------
-    ax_table.axis("off")
-    table_data = [["Threshold", "Code (um)", "COMSOL (um)", "Diff (um)", "Error (%)"]]
-    for lbl in thresholds_list:
-        c = code_crossings[lbl]
-        m = comsol_crossings[lbl]
-        d = errors[lbl]
-        p = error_pct[lbl]
-        diff_s = "—" if np.isnan(d) else f"{d:+.2f}"
-        pct_s = "—" if np.isnan(p) else f"{p:+.1f}%"
-        table_data.append([lbl, f"{c:.1f}", f"{m:.1f}", diff_s, pct_s])
+    plt.tight_layout()
+    return fig
 
-    rms = float(np.sqrt(np.nanmean(np.array(list(errors.values())) ** 2)))
-    table_data.append(["RMS error (um)", "", "", "", f"{rms:.2f}"])
 
-    tbl = ax_table.table(
-        cellText=table_data, cellLoc="center", loc="center",
-        colWidths=[0.22, 0.18, 0.20, 0.20, 0.18],
+def make_profile_figure():
+    """Gradient profile panel only — x-axis in µm, clipped to 400 µm, y ≥ 10 T/m."""
+    d_code_m = np.geomspace(25e-6, 4e-4, 400)   # dense from 25 µm to 400 µm
+    G_code   = _code_gradient_profile(d_code_m, B0_T=1.5)
+
+    v2      = load_dataset("V2")
+    d_v2_um = v2.d_mm * 1e3                     # mm → µm
+    G_v2    = v2.grad_T_per_m
+
+    fig, ax = plt.subplots(figsize=(7, 5))
+
+    ax.loglog(d_code_m * 1e6, G_code, color="#2980b9", lw=2.2,
+              label="Code (M=2.20 MA/m)", zorder=3)
+    ax.loglog(d_v2_um, G_v2, "o", ms=5.5, color="#e67e22",
+              mec="black", mew=0.5,
+              label=f"COMSOL V2 (n={len(d_v2_um)} pts)", zorder=4)
+
+    ytrans = ax.get_yaxis_transform()
+    for (lbl, val), c in zip(THRESHOLDS.items(), TH_COLORS):
+        ax.axhline(val, color=c, ls=":", lw=1.3, alpha=0.7)
+        ax.text(0.985, val, lbl, color=c, fontsize=8, va="center", ha="right",
+                transform=ytrans,
+                bbox=dict(facecolor="white", edgecolor="none", alpha=0.7, pad=0.5))
+
+    ax.set_xlabel(r"Arc length from strut surface $d$ ($\mu$m)",
+                  fontsize=11, fontweight="bold")
+    ax.set_ylabel(r"$|\nabla|B||$ (T/m)", fontsize=11, fontweight="bold")
+    ax.set_title(
+        r"Gradient profile: code vs COMSOL V2 (B$_0$ = 1.5 T)",
+        fontsize=11, fontweight="bold",
     )
-    tbl.auto_set_font_size(False)
-    tbl.set_fontsize(9)
-    tbl.scale(1, 2.2)
+    ax.set_xlim(25.0, 400.0)
+    ax.set_ylim(bottom=10)
+    ax.grid(True, which="both", alpha=0.3, ls="--")
+    ax.legend(fontsize=9, loc="lower left")
 
-    for i in range(5):
-        c = tbl[(0, i)]
-        c.set_facecolor("#34495e")
-        c.set_text_props(weight="bold", color="white")
-    for i in range(1, 4):
-        for j in range(5):
-            c = tbl[(i, j)]
-            if j in (3, 4) and not np.isnan(errors[thresholds_list[i - 1]]):
-                err = abs(errors[thresholds_list[i - 1]])
-                c.set_facecolor("#d5f4e6" if err < 10 else "#fef9e7" if err < 25 else "#fadbd8")
-            else:
-                c.set_facecolor("#ecf0f1")
-    for j in range(5):
-        c = tbl[(4, j)]
-        c.set_facecolor("#bdc3c7")
-        c.set_text_props(weight="bold")
-
-    ax_table.set_title("(c) Validation data table", fontsize=11, fontweight="bold", pad=20)
-
-    interpretation = (
-        "Code calibration at B₀ = 1.5 T matches COMSOL to within 1% at the\n"
-        "100 T/m and 40 T/m thresholds (critical for capture-zone definition).\n"
-        "The residual discrepancy at 300 T/m (≤120 um from strut) is acceptable:\n"
-        "cell capture occurs predominantly in the 40-100 T/m range where agreement\n"
-        "is excellent."
-    )
-    fig.text(0.5, 0.02, interpretation, ha="center", fontsize=8.5, style="italic",
-             bbox=dict(boxstyle="round,pad=0.8", facecolor="lightyellow", alpha=0.8))
-
-    fig.suptitle(
-        "COMSOL validation — analytical code vs FEM gradient profile\n"
-        f"({DEFAULTS['n_struts']} struts / V2-2C, M_code = {M_COMSOL_EFF_B15 / 1e6:.2f} MA/m, B₀ = 1.5 T)",
-        fontsize=12, fontweight="bold", y=0.99,
-    )
-    plt.tight_layout(rect=[0, 0.10, 1, 0.94])
+    plt.tight_layout()
     return fig
 
 
@@ -237,6 +190,12 @@ def main():
     fig.savefig(OUT / "fig4_comsol_gradient_validation.pdf", bbox_inches="tight")
     plt.close(fig)
     print("  [OK] fig4_comsol_gradient_validation saved")
+
+    fig2 = make_profile_figure()
+    fig2.savefig(OUT / "fig4b_comsol_gradient_profile.png", dpi=150, bbox_inches="tight")
+    fig2.savefig(OUT / "fig4b_comsol_gradient_profile.pdf", bbox_inches="tight")
+    plt.close(fig2)
+    print("  [OK] fig4b_comsol_gradient_profile saved")
 
 
 if __name__ == "__main__":

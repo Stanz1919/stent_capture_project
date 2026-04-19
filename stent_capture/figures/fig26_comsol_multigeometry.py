@@ -136,8 +136,16 @@ def _export_linearity(d_common, g15, g024, ratio, mean_ratio) -> None:
 _GEOM_COLOURS = {
     "V1": "#8e44ad",   # purple
     "V2": "#e67e22",   # orange — calibration geometry
-    "V3": "#16a085",   # teal
+    "V3": "#27ae60",   # green
     "V4": "#2980b9",   # blue
+}
+
+# Marker style: (marker, mfc) — mfc=None uses the geometry colour (filled)
+_GEOM_MARKERS: dict[str, tuple[str, str | None]] = {
+    "V1": ("^", "none"),   # open triangle
+    "V2": ("o", None),     # filled circle
+    "V3": ("s", None),     # filled square
+    "V4": ("D", None),     # filled diamond
 }
 
 _KEY_TO_COLOUR_KEY = {"V4_new": "V4"}
@@ -178,31 +186,24 @@ def make_figure(y_min: float | None = None, x_min: float | None = None):
     # -----------------------------------------------------------------------
     fig, ax = plt.subplots(figsize=(9, 6.5))
 
-    # V2 and V3: filled circles + Excel power-law fit dashes
-    for ds in (v2, v3):
-        c = _colour(ds.key)
-        ax.loglog(ds.d_mm, ds.grad_T_per_m, "o", ms=5, color=c,
-                  mec="black", mew=0.3,
-                  label=f"{ds.key}: N={ds.n_struts}  (COMSOL)", zorder=3)
-        fit_d = np.geomspace(max(ds.d_mm.min(), 1e-3), ds.d_mm.max(), 200)
-        ax.loglog(fit_d, ds.fit_predict(fit_d), "--", color=c, lw=1.3,
-                  alpha=0.75, zorder=2)
+    # Data points — each geometry has a unique colour + marker shape
+    # x-axis is in µm throughout (d_mm * 1e3)
+    def _plot_data(ax, d_mm, g, key, label):
+        c = _colour(key)
+        mk, mfc = _GEOM_MARKERS[key]
+        ax.loglog(d_mm * 1e3, g, mk, ms=5.5, color=c,
+                  mfc=mfc if mfc is not None else c,
+                  mec=c, mew=1.0, label=label, zorder=3)
 
-    # V4: near-field data + power-law fit (d < 0.170 mm)
-    c5 = _colour("V4")
-    ax.loglog(v5_d, v5_g, "o", ms=5, color=c5,
-              mec="black", mew=0.3,
-              label=r"V4: N=10  (COMSOL, $d<0.17$ mm)", zorder=3)
-    if v5_new.fit_A is not None and len(v5_d) > 1:
-        fit_d5 = np.geomspace(max(v5_d.min(), 1e-3), 0.170, 200)
-        ax.loglog(fit_d5, v5_new.fit_predict(fit_d5), "--", color=c5,
-                  lw=1.3, alpha=0.75, zorder=2)
-
-    # V1: open upward-triangle marker; NO power-law fit
+    _plot_data(ax, v2.d_mm,  v2.grad_T_per_m, "V2",
+               f"V2: N={v2.n_struts}  (COMSOL)")
+    _plot_data(ax, v3.d_mm,  v3.grad_T_per_m, "V3",
+               f"V3: N={v3.n_struts}  (COMSOL)")
+    _plot_data(ax, v5_d,     v5_g,             "V4",
+               r"V4: N=10  (COMSOL, $d<170\,\mu$m)")
+    _plot_data(ax, v1_d_mm,  v1_grad,          "V1",
+               r"V1: N=6  (COMSOL CSV, $d>25\,\mu$m)")
     c1 = _colour("V1")
-    ax.loglog(v1_d_mm, v1_grad, "^", ms=6.5, color=c1,
-              mfc="none", mec=c1, mew=1.4,
-              label=r"V1: N=6  (COMSOL CSV, $d>25\,\mu$m)", zorder=3)
 
     # Analytical Akoun–Yonnet curves for all four geometries
     # All use M_eff = 2.20 MA/m calibrated to V2 (N=12)
@@ -215,16 +216,16 @@ def make_figure(y_min: float | None = None, x_min: float | None = None):
         lbl = f"Analytical N={n_struts}"
         if key == "V2":
             lbl += r" ($M_\mathrm{eff}=2.20$ MA/m, cal.)"
-        ax.loglog(d_code * 1e3, G_code, color=_colour(key), lw=lw,
+        ax.loglog(d_code * 1e6, G_code, color=_colour(key), lw=lw,
                   alpha=0.9, zorder=4, label=lbl)
 
-    # Semi-reliable boundary at d = 0.200 mm
-    ax.axvline(0.200, color="#7f8c8d", ls="--", lw=1.5, alpha=0.9, zorder=1)
+    # Shaded region beyond d = 200 µm with line label
+    ax.axvspan(200, 1000, color="#7f8c8d", alpha=0.08, zorder=0)
+    ax.axvline(200, color="#7f8c8d", ls="--", lw=1.2, alpha=0.7, zorder=1)
     trans = ax.get_xaxis_transform()
-    ax.text(0.210, 0.97, "semi-reliable\nbeyond here",
-            transform=trans, fontsize=8, va="top", ha="left",
-            color="#636e72",
-            bbox=dict(facecolor="white", edgecolor="none", alpha=0.8, pad=0.5))
+    ax.text(200, 0.99, r"$200\,\mu$m", transform=trans,
+            fontsize=8, va="top", ha="right", color="#636e72",
+            bbox=dict(facecolor="white", edgecolor="none", alpha=0.7, pad=0.3))
 
     # V1 annotation
     ax.text(0.02, 0.04,
@@ -243,39 +244,28 @@ def make_figure(y_min: float | None = None, x_min: float | None = None):
                 bbox=dict(facecolor="white", edgecolor="none", alpha=0.65,
                           pad=0.5))
 
-    ax.set_xlabel("Distance from strut surface $d$ (mm)",
+    ax.set_xlabel(r"Arc length from strut surface $d$ ($\mu$m)",
                   fontsize=11, fontweight="bold")
     ax.set_ylabel(r"$|\nabla|B||$ (T/m)", fontsize=11, fontweight="bold")
     ax.set_title(
-        "V-series gradient profiles — COMSOL vs analytical (B₀ = 1.5 T)",
+        r"V-series gradient profiles — COMSOL vs analytical (B$_0$ = 1.5 T)",
         fontsize=11.5, fontweight="bold",
     )
     ax.legend(fontsize=8, loc="lower left")
     ax.grid(True, which="both", alpha=0.3, ls="--")
-    ax.set_xlim(x_min if x_min is not None else 1e-2, 1.0)
+    x_min_um = (x_min * 1e3) if x_min is not None else 10.0
+    ax.set_xlim(x_min_um, 1000.0)
     if y_min is not None:
         ax.set_ylim(bottom=y_min)
 
-    note = (
-        f"Analytical curves: $M_\\mathrm{{eff}}$ = {M_COMSOL_EFF_B15/1e6:.2f} MA/m "
-        "calibrated to V2 (N=12); same value applied to all geometries.  "
-        "V1 analytical over-predicts — V1 sits at lower gradient amplitude "
-        "than V2/V3/V4 at all depths (expected for fewer struts, N=6).  "
-        "V4 near-field filter d < 0.170 mm applied."
-    )
-    fig.text(0.5, 0.01, note, ha="center", fontsize=8, style="italic",
-             bbox=dict(boxstyle="round,pad=0.7", facecolor="lightyellow",
-                       alpha=0.85),
-             wrap=True)
-
-    plt.tight_layout(rect=[0, 0.07, 1, 1])
+    plt.tight_layout()
     return fig, v1_excel, v2, v3, v5_new, d_common, g15, g024, ratio, mean_ratio
 
 
 def main():
     print("  Fig 25: COMSOL multi-geometry gradient profiles...")
     (fig, v1_excel, v2, v3, v5_new,
-     d_common, g15, g024, ratio, mean_ratio) = make_figure()
+     d_common, g15, g024, ratio, mean_ratio) = make_figure(y_min=10)
 
     fig.savefig(OUT / "fig25_comsol_multigeometry.png", dpi=150,
                 bbox_inches="tight")
